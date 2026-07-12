@@ -246,10 +246,14 @@
     <div id="appsContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px;"></div>
   </div>
 
-  <div class="section-title">Checklist valigia (condivisa)</div>
+  <div class="section-title">Checklist valigia (personale)</div>
   <div class="panel">
     <ul class="checklist" id="packingList"></ul>
     <div class="checklist-progress" id="checklistProgress"></div>
+    <div style="display:flex; gap:8px; margin-top:14px;">
+      <input type="text" id="newChecklistItem" placeholder="Aggiungi una voce..." style="flex:1; background: var(--night); border:1px solid var(--line); border-radius:8px; padding:10px; color:var(--ice); outline:none; font-family:'Space Grotesk',sans-serif; font-size:14px;">
+      <button onclick="aggiungiVoceChecklist()" style="padding:10px 16px; border:none; border-radius:8px; background: linear-gradient(90deg, var(--aurora-1), var(--aurora-2)); color: var(--night); font-weight:700; cursor:pointer;">+</button>
+    </div>
   </div>
 
   <div class="section-title">Note e commenti del gruppo</div>
@@ -539,49 +543,66 @@ document.getElementById('iskInput').addEventListener('input', function() {
     return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(nomeLuogo + ", Iceland");
   }
 
-  // ---- Checklist condivisa (Supabase) ----
+  // ---- Checklist personale (Supabase) ----
   async function caricaChecklist(nomeUtente){
     const packingList = document.getElementById('packingList');
-    const { data, error } = await sb.from('checklist_items').select('*');
-    if(error) console.error('Errore checklist:', error.message, error.details, error.hint, error.code);
 
-    const stato = {};
-    (data || []).forEach(r => stato[r.id] = r);
+    let { data, error } = await sb.from('checklist_items').select('*').eq('owner', nomeUtente).order('created_at');
+    if(error){ console.error('Errore checklist:', error.message, error.details, error.hint, error.code); return; }
+
+    // Prima visita di questo utente: popola la sua checklist con le voci di default
+    if(!data || data.length === 0){
+      const seed = valigia.map(v => ({ owner: nomeUtente, text: v.testo, is_checked: false, is_custom: false }));
+      const { error: seedErr } = await sb.from('checklist_items').insert(seed);
+      if(seedErr){ console.error('Errore inizializzazione checklist:', seedErr.message); return; }
+      const ricarica = await sb.from('checklist_items').select('*').eq('owner', nomeUtente).order('created_at');
+      data = ricarica.data;
+    }
 
     packingList.innerHTML = '';
-    valigia.forEach(v => {
-      const row = stato[v.id];
-      const checked = row ? row.is_checked : false;
+    (data || []).forEach(item => {
       const li = document.createElement('li');
-      if(checked) li.classList.add('done');
-      li.innerHTML = '<input type="checkbox" id="chk-' + v.id + '" ' + (checked ? 'checked' : '') + '>' +
-                      '<label for="chk-' + v.id + '">' + v.testo +
-                      (checked && row && row.checked_by ? ' <span style="color:var(--ice-dim);font-size:11px;">(' + row.checked_by + ')</span>' : '') +
-                      '</label>';
+      if(item.is_checked) li.classList.add('done');
+      li.innerHTML = '<input type="checkbox" id="chk-' + item.id + '" ' + (item.is_checked ? 'checked' : '') + '>' +
+                      '<label for="chk-' + item.id + '">' + item.text + '</label>' +
+                      (item.is_custom ? '<button class="del-btn" title="Elimina voce" data-id="' + item.id + '">✕</button>' : '');
+
       li.querySelector('input').addEventListener('change', async function(){
         li.classList.toggle('done', this.checked);
         aggiornaProgressoChecklist();
-        const { error: upErr } = await sb.from('checklist_items').upsert({
-          id: v.id,
-          is_checked: this.checked,
-          checked_by: nomeUtente,
-          checked_at: new Date().toISOString()
-        });
-        if(upErr){
-          console.error('Errore salvataggio checklist:', upErr);
-        } else {
-          // aggiorna l'etichetta "(nome)" senza dover ricaricare tutto
-          caricaChecklist(nomeUtente);
-        }
+        const { error: upErr } = await sb.from('checklist_items').update({ is_checked: this.checked }).eq('id', item.id);
+        if(upErr) console.error('Errore salvataggio checklist:', upErr.message);
       });
+
+      const delBtn = li.querySelector('.del-btn');
+      if(delBtn){
+        delBtn.addEventListener('click', async function(){
+          if(!confirm('Eliminare questa voce?')) return;
+          const { error: delErr } = await sb.from('checklist_items').delete().eq('id', item.id);
+          if(delErr){ console.error('Errore eliminazione voce:', delErr.message); return; }
+          caricaChecklist(nomeUtente);
+        });
+      }
+
       packingList.appendChild(li);
     });
     aggiornaProgressoChecklist();
   }
 
   function aggiornaProgressoChecklist(){
+    const totale = document.querySelectorAll('#packingList li').length;
     const fatti = document.querySelectorAll('#packingList li.done').length;
-    document.getElementById('checklistProgress').textContent = fatti + ' / ' + valigia.length + ' completati';
+    document.getElementById('checklistProgress').textContent = fatti + ' / ' + totale + ' completati';
+  }
+
+  async function aggiungiVoceChecklist(){
+    const input = document.getElementById('newChecklistItem');
+    const testo = input.value.trim();
+    if(!testo || !window.currentUser) return;
+    const { error } = await sb.from('checklist_items').insert({ owner: window.currentUser, text: testo, is_checked: false, is_custom: true });
+    if(error){ console.error('Errore aggiunta voce:', error.message); return; }
+    input.value = '';
+    caricaChecklist(window.currentUser);
   }
 
   // ---- Note di gruppo (Supabase) ----
@@ -900,6 +921,10 @@ document.getElementById('iskInput').addEventListener('input', function() {
 
   document.getElementById('nameInput').addEventListener('keydown', function(e){
     if(e.key === 'Enter') checkAccess();
+  });
+
+  document.getElementById('newChecklistItem').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') aggiungiVoceChecklist();
   });
 
   // Service Worker: registra il file sw.js, che deve stare nella stessa cartella
