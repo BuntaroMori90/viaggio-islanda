@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Islanda 2026 ❤ </title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -150,6 +151,32 @@
 
   .offline-note{ font-size:11px; color: var(--ice-dim); margin-top:8px; opacity:0.7; }
 
+  .note-item{ padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; line-height:1.5; }
+  .note-item:last-child{ border-bottom: none; }
+  .note-item .author{ color: var(--aurora-1); font-weight:500; }
+  .note-item .ts{ color: var(--ice-dim); font-size: 11px; margin-left:6px; }
+  .note-empty, .exp-empty{ color: var(--ice-dim); font-size:13px; font-style:italic; }
+
+  .del-btn{ background:none; border:1px solid var(--line); color: var(--ice-dim); border-radius:6px; width:22px; height:22px; font-size:12px; cursor:pointer; float:right; line-height:1; }
+  .del-btn:hover{ border-color: var(--ember); color: var(--ember); }
+
+  textarea#noteInput{ width:100%; background: var(--night); border:1px solid var(--line); border-radius:8px; padding:10px; color:var(--ice); font-family:'Space Grotesk', sans-serif; font-size:14px; resize:vertical; outline:none; }
+  textarea#noteInput:focus{ border-color: var(--aurora-2); }
+  .btn-send{ margin-top:8px; padding:10px 18px; border:none; border-radius:8px; background: linear-gradient(90deg, var(--aurora-1), var(--aurora-2)); color: var(--night); font-weight:700; cursor:pointer; font-family:'Space Grotesk', sans-serif; font-size:14px; }
+  .btn-send:hover{ transform: translateY(-1px); }
+
+  .exp-row{ display:flex; justify-content:space-between; align-items:flex-start; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .exp-row:last-child{ border-bottom:none; }
+  .exp-row .paidby{ font-size:11px; color: var(--ice-dim); }
+  .exp-form{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+  .exp-form input, .exp-form select{ background: var(--night); border:1px solid var(--line); border-radius:8px; padding:10px; color:var(--ice); font-family:'Space Grotesk', sans-serif; font-size:14px; outline:none; }
+  .exp-form input:focus, .exp-form select:focus{ border-color: var(--aurora-2); }
+  #expDesc{ flex:2; min-width:140px; }
+  #expAmount{ flex:1; min-width:80px; }
+  #expPaidBy{ flex:1; min-width:120px; }
+  .exp-form button{ padding:10px 16px; border:none; border-radius:8px; background: linear-gradient(90deg, var(--aurora-1), var(--aurora-2)); color: var(--night); font-weight:700; cursor:pointer; }
+  .balances-box{ font-size:12.5px; color: var(--ice-dim); margin-bottom:14px; display:flex; flex-direction:column; gap:4px; }
+
   @media (prefers-reduced-motion: reduce){ .aurora{ animation: none; } }
   @media (max-width: 480px){
     .mbs{ grid-template-columns: 1fr; }
@@ -212,10 +239,29 @@
     <div id="appsContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px;"></div>
   </div>
 
-  <div class="section-title">Checklist valigia</div>
+  <div class="section-title">Checklist valigia (condivisa)</div>
   <div class="panel">
     <ul class="checklist" id="packingList"></ul>
     <div class="checklist-progress" id="checklistProgress"></div>
+  </div>
+
+  <div class="section-title">Note e commenti del gruppo</div>
+  <div class="panel">
+    <div id="notesList"></div>
+    <textarea id="noteInput" placeholder="Scrivi una nota per il gruppo..." rows="2"></textarea>
+    <button class="btn-send" onclick="inviaNota()">Invia</button>
+  </div>
+
+  <div class="section-title">Spese di gruppo</div>
+  <div class="panel">
+    <div id="expensesList"></div>
+    <div class="balances-box" id="balancesBox"></div>
+    <div class="exp-form">
+      <input type="text" id="expDesc" placeholder="Descrizione">
+      <input type="number" id="expAmount" placeholder="€" min="0" step="0.01">
+      <select id="expPaidBy"></select>
+      <button onclick="aggiungiSpesa()">+</button>
+    </div>
   </div>
 
   <div class="section-title">Convertitore ISK / EUR</div>
@@ -234,11 +280,17 @@
   <div class="section-title">Consigli extra</div>
   <div class="panel">
     <ul class="extra-list" id="extraList"></ul>
-    <div class="offline-note">Una volta pubblicata online e aperta almeno una volta con internet, questa pagina resta consultabile anche senza connessione (tranne meteo in tempo reale e link Maps, che la richiedono al momento del click).</div>
+    <div class="offline-note">Una volta pubblicata online e aperta almeno una volta con internet, questa pagina resta consultabile anche senza connessione (tranne meteo in tempo reale, link Maps, checklist/note/spese, che richiedono connessione al momento dell'uso).</div>
   </div>
 </div>
 
 <script>
+  // ---- Supabase ----
+  const sb = window.supabase.createClient(
+    'https://zjwntpjpigmmnymeekxf.supabase.co',
+    'sb_publishable_iHEy1TCsqZRqo3xMH_B7OA_Px9KPN2T'
+  );
+
   const partecipanti = ["Florindo", "Maria Concetta", "Emilio", "Federica", "Ruggero", "Carmen"];
   const dataPartenza = new Date(2026, 8, 29);
 
@@ -250,7 +302,7 @@
   ];
   const bagaglio = "10 kg a persona + zaino a mano";
 
-  // Checklist: id univoco + testo. L'id serve per salvare lo stato di ognuna.
+  // Checklist: id univoco + testo. L'id serve per salvare lo stato di ognuna su Supabase.
   const valigia = [
     { id: "scarpe", testo: "Scarpe da trekking impermeabili e comode" },
     { id: "guanti", testo: "Cappello e guanti" },
@@ -333,10 +385,7 @@ document.getElementById('iskInput').addEventListener('input', function() {
       must: ["Thingvellir", "Geysir", "Gullfoss", "Kerid"],
       bonus: ["Bruarfoss"], sac: ["Faxi", "Urridafoss"],
       meta: { guida: "3h 45min", benzina: "facile ovunque", cibo: "ristoranti o pranzo a sacco" },
-
-// 2. INSERISCI QUI IL LINK PERSONALIZZATO DEL GIORNO 2
       percorsoCompletoMaps: "https://maps.app.goo.gl/vTgis569Q9BGyruV7",
-
       trigger: "Meteo brutto: ridurre tempo a Thingvellir. Vento forte: attenzione a Gullfoss. <b>Piano B:</b> saltare Faxi e Urridafoss in caso di ritardo. <b>Piano C:</b> saltare anche Bruarfoss."
     },
     {
@@ -358,10 +407,7 @@ document.getElementById('iskInput').addEventListener('input', function() {
       must: ["Seljalandsfoss", "Skogafoss", "Reynisfjara", "Vik"],
       bonus: ["Kvernufoss", "Dyrholaey"], sac: ["Solheimasandur (relitto aereo)"],
       meta: { guida: "2h 20min", benzina: "Hvolsvollur o Vik", cibo: "Vik o pranzo a sacco" },
-
-      // 3. INSERISCI QUI IL LINK PERSONALIZZATO DEL GIORNO 3
       percorsoCompletoMaps: "https://maps.app.goo.gl/7ENV76P8A84TTQYw9",
-
       trigger: "Ritardo o poco tempo: saltare il relitto aereo. Meteo critico: onde alte a Reynisfjara, evitare Dyrholaey con vento forte. <b>Piano B:</b> navetta per il relitto. <b>Piano C:</b> eliminarlo del tutto se in ritardo."
     },
     {
@@ -381,10 +427,7 @@ document.getElementById('iskInput').addEventListener('input', function() {
       must: ["Ice Cave", "Diamond Beach"],
       bonus: ["Fjadrargljufur", "Skaftafell"], sac: ["Stokksness", "Foss a Sidu"],
       meta: { guida: "3h 40min", benzina: "Kirkjubaerklaustur", cibo: "limitato, pranzo a sacco/scorta" },
-
-      // 4. INSERISCI QUI IL LINK PERSONALIZZATO DEL GIORNO 4
       percorsoCompletoMaps: "https://maps.app.goo.gl/WrnNinqc7e4SjQSF8",
-
       trigger: "Meteo brutto: saltare il canyon (probabile nebbia). Vento forte: evitare Dyrholaey. <b>Piano B:</b> saltare Fjadrargljufur per priorità Ice Cave. <b>Piano C:</b> eliminare Stokksness se in ritardo."
     },
     {
@@ -401,11 +444,7 @@ document.getElementById('iskInput').addEventListener('input', function() {
       ],
       must: ["Godafoss"], bonus: ["Egilsstadir"], sac: ["Seydisfjordur"],
       meta: { guida: "7h 30min", benzina: "pieno a Egilsstadir appena possibile", cibo: "Egilsstadir o scorta" },
-
-// 5. INSERISCI QUI IL LINK PERSONALIZZATO DEL GIORNO 5
       percorsoCompletoMaps: "https://maps.app.goo.gl/3vZNPTzLnyxGcdEo7",
-
-
       trigger: "Meteo brutto: valutare le soste. Vento forte: attenzione alla guida. <b>Piano B:</b> saltare Seydisfjordur se in ritardo. <b>Piano C:</b> arrivo diretto ad Akureyri senza deviazioni."
     },
     {
@@ -425,10 +464,7 @@ document.getElementById('iskInput').addEventListener('input', function() {
       must: ["Whale Watching", "Myvatn Nature Baths"],
       bonus: ["Hverir", "Dimmuborgir"], sac: ["Dettifoss"],
       meta: { guida: "4h 30min", benzina: "Egilsstadir", cibo: "Myvatn o scorta" },
-
-// 6. INSERISCI QUI IL LINK PERSONALIZZATO DEL GIORNO 6
       percorsoCompletoMaps: "https://maps.app.goo.gl/9C4gBaDs6hTgvSzZ8",
-
       trigger: "Meteo brutto: saltare Dettifoss. Attenzione alle strade sterrate bagnate. <b>Piano B:</b> saltare Dettifoss per meteo o ritardo. <b>Piano C:</b> ridurre il tempo nell'area Myvatn."
     },
     {
@@ -446,10 +482,7 @@ document.getElementById('iskInput').addEventListener('input', function() {
       must: ["Arrivare a Grundarfjordur"],
       bonus: ["Grafarkirkja", "Hvammastangi"], sac: ["Siglufjordur"],
       meta: { guida: "6h 30min", benzina: "Akureyri", cibo: "pranzo a sacco o scorta" },
-
-// 7. INSERISCI QUI IL LINK PERSONALIZZATO DEL GIORNO 7
       percorsoCompletoMaps: "https://maps.app.goo.gl/hTXeGS9Z1Wwnmqps6",
-
       trigger: "Meteo brutto: saltare Siglufjordur. Probabile pioggia o nevischio, attenzione al vento. <b>Piano B:</b> saltare Siglufjordur se meteo avverso o tempi lunghi. <b>Piano C:</b> soste minime, solo tecniche."
     },
     {
@@ -469,11 +502,7 @@ document.getElementById('iskInput').addEventListener('input', function() {
       must: ["Kirkjufell", "Arnastapi", "Budakirkja"],
       bonus: ["Ytri Tunga"], sac: [],
       meta: { guida: "4h", benzina: "pieno finale prima del rientro auto", cibo: "pranzo a sacco o aeroporto" },
-
-// 8. INSERISCI QUI IL LINK PERSONALIZZATO DEL GIORNO 8
       percorsoCompletoMaps: "https://maps.app.goo.gl/Jqm2EA8jvJt75ouY8",
-
-
       trigger: "Timing: partenza il giorno successivo, arrivare 3h prima in aeroporto per volo e riconsegna auto. <b>Piano B:</b> saltare Ytri Tunga. <b>Piano C:</b> evitare tappe minori se in ritardo."
     }
   ];
@@ -502,6 +531,150 @@ document.getElementById('iskInput').addEventListener('input', function() {
     return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(nomeLuogo + ", Iceland");
   }
 
+  // ---- Checklist condivisa (Supabase) ----
+  async function caricaChecklist(nomeUtente){
+    const packingList = document.getElementById('packingList');
+    const { data, error } = await sb.from('checklist_items').select('*');
+    if(error) console.error('Errore checklist:', error.message, error.details, error.hint, error.code);
+
+    const stato = {};
+    (data || []).forEach(r => stato[r.id] = r);
+
+    packingList.innerHTML = '';
+    valigia.forEach(v => {
+      const row = stato[v.id];
+      const checked = row ? row.is_checked : false;
+      const li = document.createElement('li');
+      if(checked) li.classList.add('done');
+      li.innerHTML = '<input type="checkbox" id="chk-' + v.id + '" ' + (checked ? 'checked' : '') + '>' +
+                      '<label for="chk-' + v.id + '">' + v.testo +
+                      (checked && row && row.checked_by ? ' <span style="color:var(--ice-dim);font-size:11px;">(' + row.checked_by + ')</span>' : '') +
+                      '</label>';
+      li.querySelector('input').addEventListener('change', async function(){
+        li.classList.toggle('done', this.checked);
+        aggiornaProgressoChecklist();
+        const { error: upErr } = await sb.from('checklist_items').upsert({
+          id: v.id,
+          is_checked: this.checked,
+          checked_by: nomeUtente,
+          checked_at: new Date().toISOString()
+        });
+        if(upErr){
+          console.error('Errore salvataggio checklist:', upErr);
+        } else {
+          // aggiorna l'etichetta "(nome)" senza dover ricaricare tutto
+          caricaChecklist(nomeUtente);
+        }
+      });
+      packingList.appendChild(li);
+    });
+    aggiornaProgressoChecklist();
+  }
+
+  function aggiornaProgressoChecklist(){
+    const fatti = document.querySelectorAll('#packingList li.done').length;
+    document.getElementById('checklistProgress').textContent = fatti + ' / ' + valigia.length + ' completati';
+  }
+
+  // ---- Note di gruppo (Supabase) ----
+  async function caricaNote(){
+    const { data, error } = await sb.from('notes').select('*').order('created_at', { ascending: false });
+    if(error) console.error('Errore note:', error.message, error.details, error.hint, error.code);
+    const list = document.getElementById('notesList');
+    list.innerHTML = '';
+    if(!data || data.length === 0){
+      list.innerHTML = '<div class="note-empty">Nessuna nota ancora. Scrivi la prima!</div>';
+      return;
+    }
+    data.forEach(n => {
+      const item = document.createElement('div');
+      item.className = 'note-item';
+      const ts = new Date(n.created_at).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+      item.innerHTML = '<span class="author">' + n.author_name + '</span><span class="ts">' + ts + '</span>' +
+        '<button class="del-btn" title="Elimina nota" data-id="' + n.id + '">✕</button><br>' + n.content;
+      item.querySelector('.del-btn').addEventListener('click', async function(){
+        if(!confirm('Eliminare questa nota?')) return;
+        const { error } = await sb.from('notes').delete().eq('id', n.id);
+        if(error){ console.error('Errore eliminazione nota:', error.message); return; }
+        caricaNote();
+      });
+      list.appendChild(item);
+    });
+  }
+
+  async function inviaNota(){
+    const input = document.getElementById('noteInput');
+    const testo = input.value.trim();
+    if(!testo || !window.currentUser) return;
+    const { error } = await sb.from('notes').insert({ author_name: window.currentUser, content: testo });
+    if(error){ console.error('Errore invio nota:', error); return; }
+    input.value = '';
+    caricaNote();
+  }
+
+  // ---- Spese di gruppo (Supabase) ----
+  async function caricaSpese(){
+    const { data: spese, error } = await sb.from('expenses').select('*').order('created_at', { ascending: false });
+    if(error) console.error('Errore spese:', error.message, error.details, error.hint, error.code);
+    const list = document.getElementById('expensesList');
+    list.innerHTML = '';
+
+    if(!spese || spese.length === 0){
+      list.innerHTML = '<div class="exp-empty">Nessuna spesa registrata ancora.</div>';
+    } else {
+      spese.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'exp-row';
+        row.innerHTML = '<div>' + s.description + '<div class="paidby">pagato da ' + s.paid_by + '</div></div>' +
+          '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<div class="v" style="font-family:\'JetBrains Mono\',monospace;color:var(--aurora-1)">€ ' + Number(s.amount).toFixed(2) + '</div>' +
+          '<button class="del-btn" title="Elimina spesa" data-id="' + s.id + '">✕</button>' +
+          '</div>';
+        row.querySelector('.del-btn').addEventListener('click', async function(){
+          if(!confirm('Eliminare questa spesa?')) return;
+          const { error } = await sb.from('expenses').delete().eq('id', s.id);
+          if(error){ console.error('Errore eliminazione spesa:', error.message); return; }
+          caricaSpese();
+        });
+        list.appendChild(row);
+      });
+    }
+
+    // saldo: quota equa tra tutti i partecipanti rispetto al totale anticipato da ciascuno
+    const balances = {};
+    partecipanti.forEach(p => balances[p] = 0);
+    let totale = 0;
+    (spese || []).forEach(s => {
+      balances[s.paid_by] = (balances[s.paid_by] || 0) + Number(s.amount);
+      totale += Number(s.amount);
+    });
+    const quota = partecipanti.length ? totale / partecipanti.length : 0;
+    partecipanti.forEach(p => balances[p] -= quota);
+
+    const box = document.getElementById('balancesBox');
+    box.innerHTML = partecipanti.map(p => {
+      const v = balances[p];
+      const segno = v >= 0 ? '+' : '';
+      const colore = v >= 0 ? 'var(--aurora-1)' : 'var(--ember)';
+      return '<div>' + p + ': <b style="color:' + colore + '">' + segno + v.toFixed(2) + ' €</b></div>';
+    }).join('');
+  }
+
+  async function aggiungiSpesa(){
+    const descEl = document.getElementById('expDesc');
+    const amountEl = document.getElementById('expAmount');
+    const paidByEl = document.getElementById('expPaidBy');
+    const desc = descEl.value.trim();
+    const amount = parseFloat(amountEl.value);
+    const paidBy = paidByEl.value;
+    if(!desc || !amount || amount <= 0) return;
+    const { error } = await sb.from('expenses').insert({ description: desc, amount, paid_by: paidBy });
+    if(error){ console.error('Errore aggiunta spesa:', error); return; }
+    descEl.value = '';
+    amountEl.value = '';
+    caricaSpese();
+  }
+
   function checkAccess(){
     const input = document.getElementById('nameInput').value.trim();
     const match = partecipanti.find(p => p.toLowerCase() === input.toLowerCase());
@@ -514,6 +687,7 @@ document.getElementById('iskInput').addEventListener('input', function() {
     document.getElementById('gateView').classList.add('hidden');
     document.getElementById('tripView').classList.remove('hidden');
     document.getElementById('welcomeMsg').innerHTML = 'Bentornato, <b>' + match + '</b>';
+    window.currentUser = match;
 
     const oggi = new Date();
     const diffMs = dataPartenza - oggi;
@@ -546,30 +720,19 @@ document.getElementById('iskInput').addEventListener('input', function() {
     note.textContent = 'Bagaglio: ' + bagaglio;
     flightsPanel.appendChild(note);
 
-    // checklist con salvataggio: localStorage ricorda le spunte anche se chiudi la pagina
-    const packingList = document.getElementById('packingList');
-    const salvate = JSON.parse(localStorage.getItem('islanda-checklist') || '{}');
+    // checklist condivisa, note, spese — tutte da Supabase
+    caricaChecklist(match);
+    caricaNote();
+    caricaSpese();
 
-    function aggiornaProgresso(){
-      const fatti = valigia.filter(v => salvate[v.id]).length;
-      document.getElementById('checklistProgress').textContent = fatti + ' / ' + valigia.length + ' completati';
-    }
-
-    valigia.forEach(v => {
-      const li = document.createElement('li');
-      const checked = !!salvate[v.id];
-      if(checked) li.classList.add('done');
-      li.innerHTML = '<input type="checkbox" id="chk-' + v.id + '" ' + (checked ? 'checked' : '') + '>' +
-                      '<label for="chk-' + v.id + '">' + v.testo + '</label>';
-      li.querySelector('input').addEventListener('change', function(){
-        salvate[v.id] = this.checked;
-        localStorage.setItem('islanda-checklist', JSON.stringify(salvate));
-        li.classList.toggle('done', this.checked);
-        aggiornaProgresso();
-      });
-      packingList.appendChild(li);
+    // popola il select "pagato da" per le spese, con l'utente corrente preselezionato
+    const selectPaidBy = document.getElementById('expPaidBy');
+    partecipanti.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p; opt.textContent = p;
+      if(p === match) opt.selected = true;
+      selectPaidBy.appendChild(opt);
     });
-    aggiornaProgresso();
 
     // Rendering App Utili
     const appsContainer = document.getElementById('appsContainer');
@@ -661,7 +824,6 @@ document.getElementById('iskInput').addEventListener('input', function() {
     // Se il viaggio è in corso, apri il giorno di oggi e mostra il meteo live in alto
     if(giornoOggiEl){
       giornoOggiEl.classList.add('open');
-      giornoOggiEl.dispatchEvent(new Event('click', {bubbles:false})); // innesca comunque il fetch tramite il listener sopra
       giornoOggiEl.querySelector('.day-head').click();
       const gOggi = giorni[giornoDelViaggio - 1];
       const liveBox = document.getElementById('liveWeather');
