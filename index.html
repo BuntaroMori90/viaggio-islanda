@@ -777,10 +777,10 @@ document.getElementById('iskInput').addEventListener('input', function() {
     voli.forEach(v => {
       const row = document.createElement('div');
       row.className = 'flight';
-      row.innerHTML = '<div class="route">' + v.tratta + '</div>  +
+      row.innerHTML = '<div class="route">' + v.tratta + '</div>'  +
       '<div style="font-size:12px;color:var(--ice-dim)">' +
         v.compagnia + ' • ' + v.numero +
-      '</div>' + <div class="time">' + v.orario + '</div>';
+      '</div>' + '<div class="time">' + v.orario + '</div>';
       flightsPanel.appendChild(row);
     });
     const note = document.createElement('div');
