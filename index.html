@@ -86,11 +86,38 @@
 
   .panel{ background: var(--night-2); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
 
-  .flight{ display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
-  .flight:last-child{ border-bottom:none; }
-  .flight .route{ font-weight: 500; }
-  .flight .time{ font-family:'JetBrains Mono', monospace; color: var(--aurora-2); font-size: 13px; }
-  .flight-note{ margin-top:10px; font-size:12px; color: var(--ice-dim); }
+  .flight { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  padding: 10px 0; 
+  border-bottom: 1px solid var(--line); 
+  font-size: 14px; 
+}
+.flight:last-child { border-bottom: none; }
+
+/* 1. Tratta: prende più spazio a sinistra e mantiene il font-weight */
+.flight .route { 
+  flex: 1.5;
+  font-weight: 500; 
+}
+
+/* 2. Nuova classe per la Compagnia: centrata, stessa dimensione (14px) e stesso colore bianco */
+.flight .info {
+  flex: 1;
+  text-align: center;
+}
+
+/* 3. Orario: allineato a destra con i tuoi stili personalizzati */
+.flight .time { 
+  flex: 1;
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace; 
+  color: var(--aurora-2); 
+  font-size: 13px; 
+}
+
+.flight-note { margin-top: 10px; font-size: 12px; color: var(--ice-dim); }
 
   .meteo-row{ display:flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
   .meteo-stat{ flex:1; min-width: 110px; background: var(--night); border:1px solid var(--line); border-radius: 10px; padding: 12px; text-align:center; }
@@ -778,7 +805,7 @@ document.getElementById('iskInput').addEventListener('input', function() {
       const row = document.createElement('div');
       row.className = 'flight';
       row.innerHTML = '<div class="route">' + v.tratta + '</div>'  +
-      '<div style="font-size:12px;color:var(--ice-dim)">' +
+      '<div class="info">' +
         v.compagnia + ' • ' + v.numero +
       '</div>' + '<div class="time">' + v.orario + '</div>';
       flightsPanel.appendChild(row);
