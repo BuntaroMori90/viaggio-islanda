@@ -307,10 +307,10 @@
   const dataPartenza = new Date(2026, 8, 29);
 
   const voli = [
-    { tratta: "Napoli → Londra (Luton)", orario: "21:00 – 22:55" },
-    { tratta: "Londra → Reykjavik", orario: "06:15 – 08:20" },
-    { tratta: "Reykjavik → Milano", orario: "10:15 – 16:30" },
-    { tratta: "Milano → Napoli", orario: "21:25 – 22:55" }
+    { tratta: "Napoli → Londra (Luton)", compagnia: "Ryanair", numero: "FR5456", orario: "21:00 – 22:55" },
+    { tratta: "Londra (Luton) → Reykjavik",compagnia: "EasyJet", numero: "EZY2635", orario: "06:15 – 08:20" },
+    { tratta: "Reykjavik → Milano", compagnia: "EasyJet", numero: "EJU3970",orario: "10:15 – 16:30" },
+    { tratta: "Milano → Napoli",compagnia: "Ryanair", numero: "FR5972", orario: "21:25 – 22:55" }
   ];
   const bagaglio = "10 kg a persona + zaino a mano";
 
@@ -777,7 +777,10 @@ document.getElementById('iskInput').addEventListener('input', function() {
     voli.forEach(v => {
       const row = document.createElement('div');
       row.className = 'flight';
-      row.innerHTML = '<div class="route">' + v.tratta + '</div><div class="time">' + v.orario + '</div>';
+      row.innerHTML = '<div class="route">' + v.tratta + '</div>  +
+      '<div style="font-size:12px;color:var(--ice-dim)">' +
+        v.compagnia + ' • ' + v.numero +
+      '</div>' + <div class="time">' + v.orario + '</div>';
       flightsPanel.appendChild(row);
     });
     const note = document.createElement('div');
