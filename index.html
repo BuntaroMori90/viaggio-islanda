@@ -22,6 +22,7 @@ OneSignalDeferred.push(async function(OneSignal) {
     serviceWorkerParam: { scope: "/" },
     serviceWorkerPath: "OneSignalSDKWorker.js"
   });
+});
   
   // Forza la comparsa del pop-up di iscrizione nativo all'avvio
   await OneSignal.Notifications.requestPermission();
