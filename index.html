@@ -18,10 +18,10 @@
   OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
       appId: "b41b92ae-d914-41fe-946d-617765922f46",
-      notifyButton: {
-        enable: true, /* Forza la comparsa della campanella rossa in basso a destra */
-      },
     });
+    
+    // Forza la comparsa del pop-up di iscrizione nativo all'avvio
+    await OneSignal.Notifications.requestPermission();
   });
 </script>
 <style>
