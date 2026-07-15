@@ -628,15 +628,6 @@ document.getElementById('iskInput').addEventListener('input', function() {
           caricaChecklist(nomeUtente);
         });
       }
-      const delBtn = li.querySelector('.del-btn');
-      if(delBtn){
-        delBtn.addEventListener('click', async function(){
-          if(!confirm('Eliminare questa voce?')) return;
-          const { error: delErr } = await sb.from('checklist_items').delete().eq('id', item.id);
-          if(delErr){ console.error('Errore eliminazione voce:', delErr.message); return; }
-          caricaChecklist(nomeUtente);
-        });
-      }
 
       const qtyMinus = li.querySelector('.qty-minus');
       const qtyPlus = li.querySelector('.qty-plus');
@@ -657,8 +648,6 @@ document.getElementById('iskInput').addEventListener('input', function() {
           if(error) console.error('Errore aggiornamento quantità:', error.message);
         });
       }
-
-      packingList.appendChild(li);
 
       packingList.appendChild(li);
     });
