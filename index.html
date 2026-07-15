@@ -191,8 +191,13 @@
   .note-item .ts{ color: var(--ice-dim); font-size: 11px; margin-left:6px; }
   .note-empty, .exp-empty{ color: var(--ice-dim); font-size:13px; font-style:italic; }
 
-  .del-btn{ background:none; border:1px solid var(--line); color: var(--ice-dim); border-radius:6px; width:22px; height:22px; font-size:12px; cursor:pointer; float:right; line-height:1; }
+  .del-btn{ background:none; border:1px solid var(--line); color: var(--ice-dim); border-radius:6px; width:22px; height:22px; font-size:12px; cursor:pointer; line-height:1; }
   .del-btn:hover{ border-color: var(--ember); color: var(--ember); }
+
+  .qty-box{ display:flex; align-items:center; gap:6px; margin-left:auto; }
+  .qty-box button{ width:22px; height:22px; border-radius:6px; border:1px solid var(--line); background:var(--night); color:var(--ice); font-size:13px; cursor:pointer; line-height:1; font-family:'JetBrains Mono', monospace; }
+  .qty-box button:hover{ border-color: var(--aurora-2); color: var(--aurora-2); }
+  .qty-value{ font-family:'JetBrains Mono', monospace; font-size:13px; min-width:14px; text-align:center; }
 
   textarea#noteInput{ width:100%; background: var(--night); border:1px solid var(--line); border-radius:8px; padding:10px; color:var(--ice); font-family:'Space Grotesk', sans-serif; font-size:14px; resize:vertical; outline:none; }
   textarea#noteInput:focus{ border-color: var(--aurora-2); }
@@ -260,10 +265,10 @@
   <div class="section-title">Meteo &amp; Vestiario</div>
   <div class="panel">
     <div class="meteo-row">
-      <div class="meteo-stat"><div class="v">2° / 7°</div><div class="l">temperatura media</div></div>
-      <div class="meteo-stat"><div class="v">40-50%</div><div class="l">probabilità pioggia</div></div>
-      <div class="meteo-stat"><div class="v">forte</div><div class="l">vento</div></div>
-      <div class="meteo-stat"><div class="v">11h</div><div class="l">luce media/giorno</div></div>
+      <div class="meteo-stat"><div class="v">2°C / 9°C </div><div class="l">temperatura media</div></div>
+      <div class="meteo-stat"><div class="v">50% </div><div class="l">probabilità pioggia</div></div>
+      <div class="meteo-stat"><div class="v">moderato-forte</div><div class="l">vento</div></div>
+      <div class="meteo-stat"><div class="v">10h 45min </div><div class="l">luce media/giorno</div></div>
     </div>
     <div class="offline-note">Valori medi stagionali. Il meteo in tempo reale per ogni tappa è dentro ciascun giorno, qui sotto.</div>
   </div>
@@ -334,10 +339,10 @@
   const dataPartenza = new Date(2026, 8, 29);
 
   const voli = [
-    { tratta: "Napoli → Londra (Luton)", compagnia: "Ryanair", numero: "FR5456", orario: "21:00 – 22:55" },
-    { tratta: "Londra (Luton) → Reykjavik",compagnia: "EasyJet", numero: "EZY2635", orario: "06:15 – 08:20" },
-    { tratta: "Reykjavik → Milano", compagnia: "EasyJet", numero: "EJU3970",orario: "10:15 – 16:30" },
-    { tratta: "Milano → Napoli",compagnia: "Ryanair", numero: "FR5972", orario: "21:25 – 22:55" }
+    { tratta: "Napoli → Londra (Luton)", compagnia: "Ryanair", numero: "FR5456", orario: "29/09: 21:00 – 22:55" },
+    { tratta: "Londra (Luton) → Reykjavik",compagnia: "EasyJet", numero: "EZY2635", orario: "30/09: 06:15 – 08:20" },
+    { tratta: "Reykjavik → Milano", compagnia: "EasyJet", numero: "EJU3970",orario: "08/10: 10:15 – 16:30" },
+    { tratta: "Milano → Napoli",compagnia: "Ryanair", numero: "FR5972", orario: "08/10: 21:25 – 22:55" }
   ];
   const bagaglio = "10 kg a persona + zaino a mano";
 
@@ -351,7 +356,7 @@
     { id: "borraccia", testo: "Borraccia riutilizzabile (l'acqua del rubinetto in Islanda è purissima)" },
       { id: "occhiali_sole", testo: "Occhiali da sole (il riflesso su ghiaccio e asfalto bagnato è forte)" },
       { id: "crema_solare", testo: "Crema solare e burrocacao (il vento e il sole islandese seccano molto la pelle)" },
-    { id: "documenti", testo: "Documenti, carta di credito, patente" },
+    { id: "documenti", testo: "Documenti, carta di credito/debito, patente, passaporto" },
     { id: "farmaci", testo: "Kit di pronto soccorso con farmaci personali, cerotti per vesciche e paracetamolo" }
   ];
 
@@ -592,7 +597,20 @@ document.getElementById('iskInput').addEventListener('input', function() {
       if(item.is_checked) li.classList.add('done');
       li.innerHTML = '<input type="checkbox" id="chk-' + item.id + '" ' + (item.is_checked ? 'checked' : '') + '>' +
                       '<label for="chk-' + item.id + '">' + item.text + '</label>' +
-                      (item.is_custom ? '<button class="del-btn" title="Elimina voce" data-id="' + item.id + '">✕</button>' : '');
+                      (item.is_custom ? `
+<div class="qty-box">
+    <button class="qty-minus" data-id="${item.id}">−</button>
+
+    <span class="qty-value">${item.quantity || 1}</span>
+
+    <button class="qty-plus" data-id="${item.id}">+</button>
+
+    <button class="del-btn"
+            title="Elimina voce"
+            data-id="${item.id}">✕</button>
+</div>
+`
+: '');
 
       li.querySelector('input').addEventListener('change', async function(){
         li.classList.toggle('done', this.checked);
@@ -610,6 +628,37 @@ document.getElementById('iskInput').addEventListener('input', function() {
           caricaChecklist(nomeUtente);
         });
       }
+      const delBtn = li.querySelector('.del-btn');
+      if(delBtn){
+        delBtn.addEventListener('click', async function(){
+          if(!confirm('Eliminare questa voce?')) return;
+          const { error: delErr } = await sb.from('checklist_items').delete().eq('id', item.id);
+          if(delErr){ console.error('Errore eliminazione voce:', delErr.message); return; }
+          caricaChecklist(nomeUtente);
+        });
+      }
+
+      const qtyMinus = li.querySelector('.qty-minus');
+      const qtyPlus = li.querySelector('.qty-plus');
+      if(qtyMinus && qtyPlus){
+        const qtySpan = li.querySelector('.qty-value');
+        qtyMinus.addEventListener('click', async function(){
+          const nuovaQty = Math.max(1, (item.quantity || 1) - 1);
+          qtySpan.textContent = nuovaQty;
+          item.quantity = nuovaQty;
+          const { error } = await sb.from('checklist_items').update({ quantity: nuovaQty }).eq('id', item.id);
+          if(error) console.error('Errore aggiornamento quantità:', error.message);
+        });
+        qtyPlus.addEventListener('click', async function(){
+          const nuovaQty = (item.quantity || 1) + 1;
+          qtySpan.textContent = nuovaQty;
+          item.quantity = nuovaQty;
+          const { error } = await sb.from('checklist_items').update({ quantity: nuovaQty }).eq('id', item.id);
+          if(error) console.error('Errore aggiornamento quantità:', error.message);
+        });
+      }
+
+      packingList.appendChild(li);
 
       packingList.appendChild(li);
     });
@@ -626,7 +675,7 @@ document.getElementById('iskInput').addEventListener('input', function() {
     const input = document.getElementById('newChecklistItem');
     const testo = input.value.trim();
     if(!testo || !window.currentUser) return;
-    const { error } = await sb.from('checklist_items').insert({ owner: window.currentUser, text: testo, is_checked: false, is_custom: true });
+    const { error } = await sb.from('checklist_items').insert({ owner: window.currentUser, text: testo, is_checked: false, is_custom: true, quantity: 1 });
     if(error){ console.error('Errore aggiunta voce:', error.message); return; }
     input.value = '';
     caricaChecklist(window.currentUser);
