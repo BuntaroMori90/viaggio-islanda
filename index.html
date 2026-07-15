@@ -9,6 +9,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Islanda 2026">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -19,7 +20,7 @@ OneSignalDeferred.push(async function(OneSignal) {
   await OneSignal.init({
     appId: "b41b92ae-d914-41fe-946d-617765922f46",
     serviceWorkerParam: { scope: "/" },
-    serviceWorkerPath: "sw.js"
+    serviceWorkerPath: "OneSignalSDKWorker.js"
   });
   
   // Forza la comparsa del pop-up di iscrizione nativo all'avvio
