@@ -832,6 +832,14 @@ document.getElementById('iskInput').addEventListener('input', function() {
     document.getElementById('tripView').classList.remove('hidden');
     document.getElementById('welcomeMsg').innerHTML = 'Bentornato, <b>' + match + '</b>';
     window.currentUser = match;
+    window.currentUser = match;
+
+// Tagga questo dispositivo con il nome dell'utente, per poterlo
+// escludere/includere nelle notifiche push in futuro
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+window.OneSignalDeferred.push(function(OneSignal) {
+  OneSignal.User.addTag("username", match);
+});
 
     const oggi = new Date();
     const diffMs = dataPartenza - oggi;
