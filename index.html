@@ -20,8 +20,11 @@
 OneSignalDeferred.push(async function(OneSignal) {
   await OneSignal.init({
     appId: "b41b92ae-d914-41fe-946d-617765922f46",
-    serviceWorkerPath: "OneSignalSDKWorker.js"
+    serviceWorkerPath: "sw.js"
   });
+
+  await OneSignal.Notifications.requestPermission();
+});
 
   // Forza la comparsa del pop-up di iscrizione nativo all'avvio
   await OneSignal.Notifications.requestPermission();
