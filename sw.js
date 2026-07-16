@@ -1,5 +1,5 @@
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
-const CACHE_NAME = 'islanda2026-v1';
+const CACHE_NAME = 'islanda2026-v2';
 const CORE_ASSETS = [
   './',
   './index.html',
