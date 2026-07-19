@@ -1,5 +1,5 @@
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
-const CACHE_NAME = 'islanda2026-v2';
+const CACHE_NAME = 'islanda2026-v3';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -26,22 +26,37 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Strategia: cache-first per la pagina e le icone (contenuto statico che non cambia spesso),
-// network-first per tutto il resto (meteo, Supabase, font) così i dati restano aggiornati
-// quando c'è connessione, ma non si rompe nulla se manca internet.
+// Strategia:
+// - Pagina HTML (navigazione, es. index.html): network-first. Prova sempre a scaricare
+//   la versione più recente da internet; se non c'è connessione, usa quella salvata in cache.
+//   Così ogni volta che apri l'app con internet vedi subito le modifiche pubblicate.
+// - Icone/manifest (contenuto statico che cambia raramente): cache-first, con aggiornamento
+//   in background per la volta successiva.
+// - Tutto il resto (meteo, Supabase, font esterni): network-first, come prima.
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
+  const isSameOrigin = url.origin === self.location.origin;
+  const isNavigazione = req.mode === 'navigate' || (isSameOrigin && (url.pathname.endsWith('/') || url.pathname.endsWith('.html')));
 
-  const isCoreAsset = url.origin === self.location.origin;
-
-  if (isCoreAsset) {
+  if (isNavigazione) {
     event.respondWith(
-      caches.match(req).then((cached) => cached || fetch(req).then((res) => {
+      fetch(req).then((res) => {
         const resClone = res.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
         return res;
-      }).catch(() => cached))
+      }).catch(() => caches.match(req))
+    );
+  } else if (isSameOrigin) {
+    event.respondWith(
+      caches.match(req).then((cached) => {
+        const fetchPromise = fetch(req).then((res) => {
+          const resClone = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
+          return res;
+        }).catch(() => cached);
+        return cached || fetchPromise;
+      })
     );
   } else {
     event.respondWith(
