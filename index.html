@@ -294,7 +294,13 @@ OneSignalDeferred.push(async function(OneSignal) {
     <div id="appsContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px;"></div>
   </div>
 
-  <div class="section-title">Checklist valigia (personale)</div>
+  <div class="section-title">Cosa è consigliato avere con te</div>
+  <div class="panel">
+    <ul class="checklist" id="staticPackingList"></ul>
+    <div class="checklist-progress" id="checklistProgressFissa"></div>
+  </div>
+
+  <div class="section-title">La tua checklist personalizzabile</div>
   <div class="panel">
     <ul class="checklist" id="packingList"></ul>
     <div class="checklist-progress" id="checklistProgress"></div>
@@ -591,89 +597,100 @@ document.getElementById('iskInput').addEventListener('input', function() {
     return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(nomeLuogo + ", Iceland");
   }
 
-  // ---- Checklist personale (Supabase) ----
+  // ---- Checklist: blocco fisso consigliato + blocco personalizzabile (entrambi su Supabase) ----
+  // Ogni voce ha is_custom:false (le 10 consigliate, non eliminabili) oppure is_custom:true (aggiunte dall'utente, eliminabili).
+  // Entrambe hanno spunta e quantità persistenti: chi ha già segnato qualcosa lo ritrova.
+  function creaVoceChecklist(item, container, progressId, permetteEliminazione, mostraQuantita, nomeUtente){
+    const li = document.createElement('li');
+    if(item.is_checked) li.classList.add('done');
+    const qtyHTML = mostraQuantita
+      ? '<button class="qty-minus" data-id="' + item.id + '">−</button>' +
+        '<span class="qty-value">' + (item.quantity || 1) + '</span>' +
+        '<button class="qty-plus" data-id="' + item.id + '">+</button>'
+      : '';
+    li.innerHTML = '<input type="checkbox" id="chk-' + item.id + '" ' + (item.is_checked ? 'checked' : '') + '>' +
+                    '<label for="chk-' + item.id + '">' + item.text + '</label>' +
+                    '<div class="qty-box">' +
+                      qtyHTML +
+                      (permetteEliminazione ? '<button class="del-btn" title="Elimina voce" data-id="' + item.id + '">✕</button>' : '') +
+                    '</div>';
+
+    li.querySelector('input').addEventListener('change', async function(){
+      li.classList.toggle('done', this.checked);
+      aggiornaProgressoBlocco(container, progressId);
+      const { error: upErr } = await sb.from('checklist_items').update({ is_checked: this.checked }).eq('id', item.id);
+      if(upErr) console.error('Errore salvataggio checklist:', upErr.message);
+    });
+
+    const delBtn = li.querySelector('.del-btn');
+    if(delBtn){
+      delBtn.addEventListener('click', async function(){
+        if(!confirm('Eliminare questa voce?')) return;
+        const { error: delErr } = await sb.from('checklist_items').delete().eq('id', item.id);
+        if(delErr){ console.error('Errore eliminazione voce:', delErr.message); return; }
+        caricaChecklist(nomeUtente);
+      });
+    }
+
+    const qtySpan = li.querySelector('.qty-value');
+    if(qtySpan){
+      li.querySelector('.qty-minus').addEventListener('click', async function(){
+        const nuovaQty = Math.max(1, (item.quantity || 1) - 1);
+        qtySpan.textContent = nuovaQty;
+        item.quantity = nuovaQty;
+        const { error } = await sb.from('checklist_items').update({ quantity: nuovaQty }).eq('id', item.id);
+        if(error) console.error('Errore aggiornamento quantità:', error.message);
+      });
+      li.querySelector('.qty-plus').addEventListener('click', async function(){
+        const nuovaQty = (item.quantity || 1) + 1;
+        qtySpan.textContent = nuovaQty;
+        item.quantity = nuovaQty;
+        const { error } = await sb.from('checklist_items').update({ quantity: nuovaQty }).eq('id', item.id);
+        if(error) console.error('Errore aggiornamento quantità:', error.message);
+      });
+    }
+
+    return li;
+  }
+
+  function aggiornaProgressoBlocco(container, progressId){
+    const totale = container.querySelectorAll('input[type="checkbox"]').length;
+    const fatti = container.querySelectorAll('li.done').length;
+    document.getElementById(progressId).textContent = fatti + ' / ' + totale + ' completati';
+  }
+
   async function caricaChecklist(nomeUtente){
+    const staticList = document.getElementById('staticPackingList');
     const packingList = document.getElementById('packingList');
 
     let { data, error } = await sb.from('checklist_items').select('*').eq('owner', nomeUtente).order('created_at');
     if(error){ console.error('Errore checklist:', error.message, error.details, error.hint, error.code); return; }
 
-    // Prima visita di questo utente: popola la sua checklist con le voci di default
-    if(!data || data.length === 0){
-      const seed = valigia.map(v => ({ owner: nomeUtente, text: v.testo, is_checked: false, is_custom: false }));
+    // Prima visita di questo utente: crea le 10 voci consigliate. Restano poi persistenti (spunta/quantità) per sempre.
+    const haGiaVociFisse = (data || []).some(item => !item.is_custom);
+    if(!haGiaVociFisse){
+      const seed = valigia.map(v => ({ owner: nomeUtente, text: v.testo, is_checked: false, is_custom: false, quantity: 1 }));
       const { error: seedErr } = await sb.from('checklist_items').insert(seed);
       if(seedErr){ console.error('Errore inizializzazione checklist:', seedErr.message); return; }
       const ricarica = await sb.from('checklist_items').select('*').eq('owner', nomeUtente).order('created_at');
       data = ricarica.data;
     }
 
+    const fisse = (data || []).filter(item => !item.is_custom);
+    const personali = (data || []).filter(item => item.is_custom);
+
+    staticList.innerHTML = '';
+    fisse.forEach(item => staticList.appendChild(creaVoceChecklist(item, staticList, 'checklistProgressFissa', true, false, nomeUtente)));
+
     packingList.innerHTML = '';
-    (data || []).forEach(item => {
-      const li = document.createElement('li');
-      if(item.is_checked) li.classList.add('done');
-      li.innerHTML = '<input type="checkbox" id="chk-' + item.id + '" ' + (item.is_checked ? 'checked' : '') + '>' +
-                      '<label for="chk-' + item.id + '">' + item.text + '</label>' +
-                      (item.is_custom ? `
-<div class="qty-box">
-    <button class="qty-minus" data-id="${item.id}">−</button>
+    if(personali.length === 0){
+      packingList.innerHTML = '<li style="border-bottom:none;"><span class="note-empty">Nessuna voce personale ancora. Aggiungila qui sotto.</span></li>';
+    } else {
+      personali.forEach(item => packingList.appendChild(creaVoceChecklist(item, packingList, 'checklistProgress', true, true, nomeUtente)));
+    }
 
-    <span class="qty-value">${item.quantity || 1}</span>
-
-    <button class="qty-plus" data-id="${item.id}">+</button>
-
-    <button class="del-btn"
-            title="Elimina voce"
-            data-id="${item.id}">✕</button>
-</div>
-`
-: '');
-
-      li.querySelector('input').addEventListener('change', async function(){
-        li.classList.toggle('done', this.checked);
-        aggiornaProgressoChecklist();
-        const { error: upErr } = await sb.from('checklist_items').update({ is_checked: this.checked }).eq('id', item.id);
-        if(upErr) console.error('Errore salvataggio checklist:', upErr.message);
-      });
-
-      const delBtn = li.querySelector('.del-btn');
-      if(delBtn){
-        delBtn.addEventListener('click', async function(){
-          if(!confirm('Eliminare questa voce?')) return;
-          const { error: delErr } = await sb.from('checklist_items').delete().eq('id', item.id);
-          if(delErr){ console.error('Errore eliminazione voce:', delErr.message); return; }
-          caricaChecklist(nomeUtente);
-        });
-      }
-
-      const qtyMinus = li.querySelector('.qty-minus');
-      const qtyPlus = li.querySelector('.qty-plus');
-      if(qtyMinus && qtyPlus){
-        const qtySpan = li.querySelector('.qty-value');
-        qtyMinus.addEventListener('click', async function(){
-          const nuovaQty = Math.max(1, (item.quantity || 1) - 1);
-          qtySpan.textContent = nuovaQty;
-          item.quantity = nuovaQty;
-          const { error } = await sb.from('checklist_items').update({ quantity: nuovaQty }).eq('id', item.id);
-          if(error) console.error('Errore aggiornamento quantità:', error.message);
-        });
-        qtyPlus.addEventListener('click', async function(){
-          const nuovaQty = (item.quantity || 1) + 1;
-          qtySpan.textContent = nuovaQty;
-          item.quantity = nuovaQty;
-          const { error } = await sb.from('checklist_items').update({ quantity: nuovaQty }).eq('id', item.id);
-          if(error) console.error('Errore aggiornamento quantità:', error.message);
-        });
-      }
-
-      packingList.appendChild(li);
-    });
-    aggiornaProgressoChecklist();
-  }
-
-  function aggiornaProgressoChecklist(){
-    const totale = document.querySelectorAll('#packingList li').length;
-    const fatti = document.querySelectorAll('#packingList li.done').length;
-    document.getElementById('checklistProgress').textContent = fatti + ' / ' + totale + ' completati';
+    aggiornaProgressoBlocco(staticList, 'checklistProgressFissa');
+    aggiornaProgressoBlocco(packingList, 'checklistProgress');
   }
 
   async function aggiungiVoceChecklist(){
@@ -877,7 +894,7 @@ window.OneSignalDeferred.push(function(OneSignal) {
     note.textContent = 'Bagaglio: ' + bagaglio;
     flightsPanel.appendChild(note);
 
-    // checklist condivisa, note, spese — tutte da Supabase
+    // checklist consigliata + checklist personalizzabile, note, spese — tutte da Supabase
     caricaChecklist(match);
     caricaNote();
     caricaSpese();
@@ -899,11 +916,11 @@ window.OneSignalDeferred.push(function(OneSignal) {
       appCard.style.border = '1px solid var(--line)';
       appCard.style.borderRadius = '10px';
       appCard.style.padding = '14px';
-      
+
       appCard.innerHTML = 
         '<div style="font-family:\'JetBrains Mono\', monospace; font-size:13px; color:var(--aurora-1); font-weight:500; margin-bottom:6px;">' + app.nome + '</div>' +
         '<div style="font-size:12.5px; color:var(--ice-dim); line-height:1.5;">' + app.desc + '</div>';
-        
+
       appsContainer.appendChild(appCard);
     });
 
