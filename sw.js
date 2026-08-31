@@ -1,4 +1,4 @@
-const CACHE_NAME = 'islanda2026-v4';
+const CACHE_NAME = 'islanda2026-v5';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -27,17 +27,18 @@ self.addEventListener('activate', (event) => {
 });
 
 // Strategia:
-// - Pagina HTML (navigazione, es. index.html): network-first. Prova sempre a scaricare
-//   la versione più recente da internet; se non c'è connessione, usa quella salvata in cache.
-// - Icone/manifest e script locali: cache-first, con aggiornamento in background.
-// - Tutto il resto (meteo, Supabase, font esterni): network-first.
+// - HTML e push-notifications.js: network-first, così login e push usano subito
+//   la versione più recente quando c'è connessione; offline si usa la cache.
+// - Altri asset locali: cache-first, con aggiornamento in background.
+// - Risorse esterne (meteo, Supabase, font): network-first.
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
   const isSameOrigin = url.origin === self.location.origin;
   const isNavigazione = req.mode === 'navigate' || (isSameOrigin && (url.pathname.endsWith('/') || url.pathname.endsWith('.html')));
+  const isPushScript = isSameOrigin && url.pathname.endsWith('/push-notifications.js');
 
-  if (isNavigazione) {
+  if (isNavigazione || isPushScript) {
     event.respondWith(
       fetch(req).then((res) => {
         const resClone = res.clone();
