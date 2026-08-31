@@ -1,5 +1,6 @@
 (() => {
   const ONESIGNAL_APP_ID = "b41b92ae-d914-41fe-946d-617765922f46";
+  const ONESIGNAL_SAFARI_WEB_ID = "web.onesignal.auto.2c53d929-118c-4db5-ba77-650d97dbe49e";
 
   let oneSignalInstance = null;
   let initialized = false;
@@ -235,6 +236,7 @@
     try {
       await OneSignal.init({
         appId: ONESIGNAL_APP_ID,
+        safari_web_id: ONESIGNAL_SAFARI_WEB_ID,
         serviceWorkerPath: "push/onesignal/OneSignalSDKWorker.js",
         serviceWorkerParam: { scope: "/push/onesignal/" },
         autoResubscribe: true,
