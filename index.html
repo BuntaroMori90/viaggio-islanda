@@ -13,21 +13,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Islanda 2026">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-
-window.OneSignalDeferred = window.OneSignalDeferred || [];
-
-OneSignalDeferred.push(async function(OneSignal) {
-  await OneSignal.init({
-    appId: "b41b92ae-d914-41fe-946d-617765922f46",
-    serviceWorkerParam: { scope: "/" },
-    serviceWorkerPath: "/sw.js"
-  });
-  console.log("OneSignal inizializzato");
-  await OneSignal.Notifications.requestPermission();
-});
-</script>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script src="push-notifications.js" defer></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -851,14 +838,9 @@ document.getElementById('iskInput').addEventListener('input', function() {
     document.getElementById('tripView').classList.remove('hidden');
     document.getElementById('welcomeMsg').innerHTML = 'Bentornato, <b>' + match + '</b>';
     window.currentUser = match;
-    window.currentUser = match;
-
-// Tagga questo dispositivo con il nome dell'utente, per poterlo
-// escludere/includere nelle notifiche push in futuro
-window.OneSignalDeferred = window.OneSignalDeferred || [];
-window.OneSignalDeferred.push(function(OneSignal) {
-  OneSignal.User.addTag("username", match);
-});
+    if (window.IslandaPush) {
+      void window.IslandaPush.identify(match);
+    }
 
     const oggi = new Date();
     const diffMs = dataPartenza - oggi;
@@ -1041,8 +1023,8 @@ window.OneSignalDeferred.push(function(OneSignal) {
   // Richiede HTTPS: funziona solo dopo la pubblicazione, non aprendo il file in locale.
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(() => {
-        // se il file sw.js non è presente o l'ambiente non supporta HTTPS, si ignora silenziosamente
+      navigator.serviceWorker.register('sw.js').catch((error) => {
+        console.error('[Islanda PWA] Registrazione service worker fallita:', error);
       });
     });
   }
