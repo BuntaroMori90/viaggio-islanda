@@ -61,7 +61,7 @@
       <div class="panel" style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
         <div style="min-width:0;flex:1;">
           <div id="pushStatus" style="font-size:14px;font-weight:600;">Controllo notifiche…</div>
-          <div id="pushDetail" style="margin-top:4px;font-size:12px;line-height:1.5;color:var(--ice-dim);">Verifico browser e subscription.</div>
+          <div id="pushDetail" style="margin-top:4px;font-size:12px;line-height:1.5;color:var(--ice-dim);">Verifico browser, subscription e identità.</div>
         </div>
         <button id="pushEnableButton" type="button" class="btn-send" style="margin-top:0;white-space:nowrap;">Attiva notifiche</button>
       </div>
@@ -79,11 +79,13 @@
 
   async function identifyCurrentUser(OneSignal) {
     const participant = window.currentUser;
-    if (!participant) return;
+    if (!participant) return null;
 
-    await OneSignal.login(participantExternalId(participant));
+    const externalId = participantExternalId(participant);
+    await OneSignal.login(externalId);
     OneSignal.User.addTag("username", participant);
     OneSignal.User.addTag("trip", "islanda-2026");
+    return externalId;
   }
 
   async function refreshStatus() {
@@ -121,14 +123,44 @@
       return;
     }
 
+    if (typeof Notification !== "undefined" && Notification.permission === "denied") {
+      setStatus(
+        "Notifiche bloccate dal browser",
+        "Riabilita le notifiche nelle impostazioni del sito del browser, poi ricarica Islanda 2026.",
+        "warn"
+      );
+      if (ui.button) {
+        ui.button.textContent = "Permesso bloccato";
+        ui.button.disabled = true;
+      }
+      return;
+    }
+
     const permission = OneSignal.Notifications.permission;
     const optedIn = OneSignal.User.PushSubscription.optedIn;
     const subscriptionId = OneSignal.User.PushSubscription.id;
+    const expectedExternalId = window.currentUser
+      ? participantExternalId(window.currentUser)
+      : null;
+    const currentExternalId = OneSignal.User.externalId;
 
     if (permission && optedIn && subscriptionId) {
+      if (expectedExternalId && currentExternalId !== expectedExternalId) {
+        setStatus(
+          "Notifiche attive, identità da sincronizzare",
+          `Subscription ${subscriptionId.slice(0, 8)}… attiva. Premi per collegarla a ${window.currentUser}.`,
+          "warn"
+        );
+        if (ui.button) {
+          ui.button.textContent = "Sincronizza identità";
+          ui.button.disabled = false;
+        }
+        return;
+      }
+
       setStatus(
         "Notifiche attive",
-        `Dispositivo registrato correttamente (${subscriptionId.slice(0, 8)}…).`,
+        `Dispositivo registrato e associato a ${window.currentUser || "questo utente"} (${subscriptionId.slice(0, 8)}…).`,
         "ok"
       );
       if (ui.button) {
@@ -190,21 +222,22 @@
         return;
       }
 
+      if (typeof Notification !== "undefined" && Notification.permission === "denied") {
+        await refreshStatus();
+        return;
+      }
+
       if (ui.button) {
         ui.button.disabled = true;
         ui.button.textContent = "Attivazione…";
       }
 
       await identifyCurrentUser(OneSignal);
+      await OneSignal.User.PushSubscription.optIn();
 
-      if (!OneSignal.Notifications.permission) {
-        await OneSignal.Notifications.requestPermission();
-      }
-
-      if (OneSignal.Notifications.permission) {
-        await OneSignal.User.PushSubscription.optIn();
-      }
-
+      // Quando il browser crea il token dopo optIn, il listener change qui sotto
+      // esegue nuovamente login(external_id). Questa chiamata copre anche il caso
+      // in cui la subscription fosse già pronta.
       await identifyCurrentUser(OneSignal);
       await refreshStatus();
     } catch (error) {
@@ -219,6 +252,20 @@
         ui.button.textContent = "Riprova";
       }
     }
+  }
+
+  async function handleSubscriptionChange() {
+    if (!oneSignalInstance) return;
+
+    try {
+      if (window.currentUser && oneSignalInstance.User.PushSubscription.id) {
+        await identifyCurrentUser(oneSignalInstance);
+      }
+    } catch (error) {
+      console.error("[Islanda Push] Errore sincronizzazione identità:", error);
+    }
+
+    await refreshStatus();
   }
 
   window.IslandaPush = {
@@ -246,7 +293,8 @@
       initialized = true;
 
       OneSignal.Notifications.addEventListener("permissionChange", refreshStatus);
-      OneSignal.User.PushSubscription.addEventListener("change", refreshStatus);
+      OneSignal.User.PushSubscription.addEventListener("change", handleSubscriptionChange);
+      OneSignal.User.addEventListener("change", refreshStatus);
 
       if (window.currentUser) {
         await identifyCurrentUser(OneSignal);
