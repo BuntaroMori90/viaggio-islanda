@@ -1,0 +1,90 @@
+name: Patch Islanda push UI
+
+on:
+  push:
+    branches:
+      - fix/push-notifications
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/push-notifications
+
+      - name: Patch index.html
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path("index.html")
+          text = path.read_text(encoding="utf-8")
+
+          old_init = '''  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+          <script>
+
+          window.OneSignalDeferred = window.OneSignalDeferred || [];
+
+          OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+              appId: "b41b92ae-d914-41fe-946d-617765922f46",
+              serviceWorkerParam: { scope: "/" },
+              serviceWorkerPath: "/sw.js"
+            });
+            console.log("OneSignal inizializzato");
+            await OneSignal.Notifications.requestPermission();
+          });
+          </script>'''.replace("          ", "")
+
+          new_init = '''  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+          <script src="push-notifications.js" defer></script>'''.replace("          ", "")
+
+          old_identity = '''    window.currentUser = match;
+          window.currentUser = match;
+
+          // Tagga questo dispositivo con il nome dell'utente, per poterlo
+          // escludere/includere nelle notifiche push in futuro
+          window.OneSignalDeferred = window.OneSignalDeferred || [];
+          window.OneSignalDeferred.push(function(OneSignal) {
+            OneSignal.User.addTag("username", match);
+          });'''.replace("          ", "")
+
+          new_identity = '''    window.currentUser = match;
+          if (window.IslandaPush) {
+            void window.IslandaPush.identify(match);
+          }'''.replace("          ", "")
+
+          old_sw = '''      navigator.serviceWorker.register('sw.js').catch(() => {
+                // se il file sw.js non è presente o l'ambiente non supporta HTTPS, si ignora silenziosamente
+              });'''.replace("              ", "")
+
+          new_sw = '''      navigator.serviceWorker.register('sw.js').catch((error) => {
+                console.error('[Islanda PWA] Registrazione service worker fallita:', error);
+              });'''.replace("              ", "")
+
+          replacements = [
+              (old_init, new_init, "inizializzazione OneSignal"),
+              (old_identity, new_identity, "identità partecipante"),
+              (old_sw, new_sw, "diagnostica service worker"),
+          ]
+
+          for old, new, label in replacements:
+              if old not in text:
+                  raise SystemExit(f"Blocco non trovato: {label}")
+              text = text.replace(old, new, 1)
+
+          path.write_text(text, encoding="utf-8")
+
+      - name: Remove one-shot workflow and commit
+        run: |
+          rm .github/workflows/patch-push-ui.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/patch-push-ui.yml
+          git commit -m "Collega la nuova gestione push alla pagina"
+          git push origin HEAD:fix/push-notifications
