@@ -1,0 +1,268 @@
+(() => {
+  const ONESIGNAL_APP_ID = "b41b92ae-d914-41fe-946d-617765922f46";
+
+  let oneSignalInstance = null;
+  let initialized = false;
+
+  const ui = {
+    box: null,
+    status: null,
+    detail: null,
+    button: null,
+  };
+
+  function participantExternalId(name) {
+    return `islanda-2026:${String(name || "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")}`;
+  }
+
+  function isIOS() {
+    return /iphone|ipad|ipod/i.test(navigator.userAgent);
+  }
+
+  function isStandalone() {
+    return (
+      window.matchMedia?.("(display-mode: standalone)")?.matches ||
+      window.navigator.standalone === true
+    );
+  }
+
+  function setStatus(label, detail, tone = "muted") {
+    if (!ui.status || !ui.detail) return;
+
+    const colors = {
+      ok: "var(--aurora-1)",
+      warn: "var(--ember)",
+      muted: "var(--ice-dim)",
+    };
+
+    ui.status.textContent = label;
+    ui.status.style.color = colors[tone] || colors.muted;
+    ui.detail.textContent = detail || "";
+  }
+
+  function buildPanel() {
+    if (document.getElementById("pushPanel")) return;
+
+    const tripView = document.getElementById("tripView");
+    const topRow = tripView?.querySelector(".top-row");
+    if (!tripView || !topRow) return;
+
+    const wrapper = document.createElement("div");
+    wrapper.id = "pushPanel";
+    wrapper.innerHTML = `
+      <div class="section-title">Notifiche</div>
+      <div class="panel" style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+        <div style="min-width:0;flex:1;">
+          <div id="pushStatus" style="font-size:14px;font-weight:600;">Controllo notifiche…</div>
+          <div id="pushDetail" style="margin-top:4px;font-size:12px;line-height:1.5;color:var(--ice-dim);">Verifico browser e subscription.</div>
+        </div>
+        <button id="pushEnableButton" type="button" class="btn-send" style="margin-top:0;white-space:nowrap;">Attiva notifiche</button>
+      </div>
+    `;
+
+    topRow.insertAdjacentElement("afterend", wrapper);
+
+    ui.box = wrapper;
+    ui.status = document.getElementById("pushStatus");
+    ui.detail = document.getElementById("pushDetail");
+    ui.button = document.getElementById("pushEnableButton");
+
+    ui.button?.addEventListener("click", activatePush);
+  }
+
+  async function identifyCurrentUser(OneSignal) {
+    const participant = window.currentUser;
+    if (!participant) return;
+
+    await OneSignal.login(participantExternalId(participant));
+    OneSignal.User.addTag("username", participant);
+    OneSignal.User.addTag("trip", "islanda-2026");
+  }
+
+  async function refreshStatus() {
+    buildPanel();
+
+    if (!initialized || !oneSignalInstance) {
+      setStatus(
+        "Servizio push in inizializzazione",
+        "Attendi qualche secondo e riprova.",
+        "muted"
+      );
+      return;
+    }
+
+    const OneSignal = oneSignalInstance;
+    const supported = OneSignal.Notifications.isPushSupported();
+
+    if (!supported) {
+      setStatus(
+        "Notifiche non supportate",
+        "Questo browser o questa modalità di navigazione non supporta le Web Push.",
+        "warn"
+      );
+      if (ui.button) ui.button.disabled = true;
+      return;
+    }
+
+    if (isIOS() && !isStandalone()) {
+      setStatus(
+        "Installa prima la web app",
+        "Su iPhone/iPad aggiungi Islanda 2026 alla schermata Home, poi aprila dall’icona e attiva le notifiche.",
+        "warn"
+      );
+      if (ui.button) ui.button.disabled = false;
+      return;
+    }
+
+    const permission = OneSignal.Notifications.permission;
+    const optedIn = OneSignal.User.PushSubscription.optedIn;
+    const subscriptionId = OneSignal.User.PushSubscription.id;
+
+    if (permission && optedIn && subscriptionId) {
+      setStatus(
+        "Notifiche attive",
+        `Dispositivo registrato correttamente (${subscriptionId.slice(0, 8)}…).`,
+        "ok"
+      );
+      if (ui.button) {
+        ui.button.textContent = "Notifiche attive";
+        ui.button.disabled = true;
+      }
+      return;
+    }
+
+    if (permission && !optedIn) {
+      setStatus(
+        "Permesso concesso, subscription non attiva",
+        "Premi il pulsante per completare la registrazione del dispositivo.",
+        "warn"
+      );
+      if (ui.button) {
+        ui.button.textContent = "Completa attivazione";
+        ui.button.disabled = false;
+      }
+      return;
+    }
+
+    setStatus(
+      "Notifiche non ancora attive",
+      "Premi il pulsante: il browser ti chiederà il permesso solo in quel momento.",
+      "muted"
+    );
+    if (ui.button) {
+      ui.button.textContent = "Attiva notifiche";
+      ui.button.disabled = false;
+    }
+  }
+
+  async function activatePush() {
+    if (!initialized || !oneSignalInstance) {
+      await refreshStatus();
+      return;
+    }
+
+    const OneSignal = oneSignalInstance;
+
+    try {
+      if (!OneSignal.Notifications.isPushSupported()) {
+        await refreshStatus();
+        return;
+      }
+
+      if (isIOS() && !isStandalone()) {
+        await refreshStatus();
+        return;
+      }
+
+      if (!window.currentUser) {
+        setStatus(
+          "Utente non identificato",
+          "Rientra inserendo il tuo nome e riprova.",
+          "warn"
+        );
+        return;
+      }
+
+      if (ui.button) {
+        ui.button.disabled = true;
+        ui.button.textContent = "Attivazione…";
+      }
+
+      await identifyCurrentUser(OneSignal);
+
+      if (!OneSignal.Notifications.permission) {
+        await OneSignal.Notifications.requestPermission();
+      }
+
+      if (OneSignal.Notifications.permission) {
+        await OneSignal.User.PushSubscription.optIn();
+      }
+
+      await identifyCurrentUser(OneSignal);
+      await refreshStatus();
+    } catch (error) {
+      console.error("[Islanda Push] Errore attivazione:", error);
+      setStatus(
+        "Attivazione non riuscita",
+        "Controlla i permessi del browser e riprova. L’errore è visibile nella console.",
+        "warn"
+      );
+      if (ui.button) {
+        ui.button.disabled = false;
+        ui.button.textContent = "Riprova";
+      }
+    }
+  }
+
+  window.IslandaPush = {
+    refresh: refreshStatus,
+    identify: async (participant) => {
+      window.currentUser = participant;
+      if (!initialized || !oneSignalInstance) return;
+      await identifyCurrentUser(oneSignalInstance);
+      await refreshStatus();
+    },
+  };
+
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.OneSignalDeferred.push(async function (OneSignal) {
+    try {
+      await OneSignal.init({
+        appId: ONESIGNAL_APP_ID,
+        serviceWorkerPath: "push/onesignal/OneSignalSDKWorker.js",
+        serviceWorkerParam: { scope: "/push/onesignal/" },
+        autoResubscribe: true,
+      });
+
+      oneSignalInstance = OneSignal;
+      initialized = true;
+
+      OneSignal.Notifications.addEventListener("permissionChange", refreshStatus);
+      OneSignal.User.PushSubscription.addEventListener("change", refreshStatus);
+
+      if (window.currentUser) {
+        await identifyCurrentUser(OneSignal);
+      }
+
+      await refreshStatus();
+      console.info("[Islanda Push] OneSignal inizializzato");
+    } catch (error) {
+      initialized = false;
+      console.error("[Islanda Push] Inizializzazione OneSignal fallita:", error);
+      buildPanel();
+      setStatus(
+        "Servizio push non disponibile",
+        "L’inizializzazione OneSignal è fallita. Controlla configurazione e service worker.",
+        "warn"
+      );
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", buildPanel);
+})();
