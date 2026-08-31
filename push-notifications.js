@@ -2,6 +2,7 @@
   const ONESIGNAL_APP_ID = "b41b92ae-d914-41fe-946d-617765922f46";
   const ONESIGNAL_SAFARI_WEB_ID = "web.onesignal.auto.2c53d929-118c-4db5-ba77-650d97dbe49e";
   const PUSH_REGISTRATION_URL = "https://zjwntpjpigmmnymeekxf.supabase.co/functions/v1/islanda-register-push";
+  const SAVED_PARTICIPANT_KEY = "islanda2026_participant";
 
   let oneSignalInstance = null;
   let initialized = false;
@@ -11,6 +12,7 @@
     status: null,
     detail: null,
     button: null,
+    changeUserButton: null,
   };
 
   function participantExternalId(name) {
@@ -21,6 +23,28 @@
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")}`;
+  }
+
+  function rememberParticipant(name) {
+    try {
+      if (name) localStorage.setItem(SAVED_PARTICIPANT_KEY, String(name));
+    } catch (error) {
+      console.warn("[Islanda] Impossibile memorizzare il partecipante:", error);
+    }
+  }
+
+  function getRememberedParticipant() {
+    try {
+      return localStorage.getItem(SAVED_PARTICIPANT_KEY) || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function forgetParticipant() {
+    try {
+      localStorage.removeItem(SAVED_PARTICIPANT_KEY);
+    } catch {}
   }
 
   function isIOS() {
@@ -48,6 +72,19 @@
     ui.detail.textContent = detail || "";
   }
 
+  async function changeUser() {
+    forgetParticipant();
+    window.currentUser = null;
+
+    try {
+      if (oneSignalInstance) await oneSignalInstance.logout();
+    } catch (error) {
+      console.warn("[Islanda Push] Logout OneSignal non riuscito:", error);
+    }
+
+    window.location.reload();
+  }
+
   function buildPanel() {
     if (document.getElementById("pushPanel")) return;
 
@@ -64,7 +101,10 @@
           <div id="pushStatus" style="font-size:14px;font-weight:600;">Controllo notifiche…</div>
           <div id="pushDetail" style="margin-top:4px;font-size:12px;line-height:1.5;color:var(--ice-dim);">Verifico browser, subscription e identità.</div>
         </div>
-        <button id="pushEnableButton" type="button" class="btn-send" style="margin-top:0;white-space:nowrap;">Attiva notifiche</button>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <button id="pushEnableButton" type="button" class="btn-send" style="margin-top:0;white-space:nowrap;">Attiva notifiche</button>
+          <button id="pushChangeUserButton" type="button" style="margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--ice-dim);font:inherit;font-size:12px;cursor:pointer;white-space:nowrap;">Cambia utente</button>
+        </div>
       </div>
     `;
 
@@ -74,8 +114,28 @@
     ui.status = document.getElementById("pushStatus");
     ui.detail = document.getElementById("pushDetail");
     ui.button = document.getElementById("pushEnableButton");
+    ui.changeUserButton = document.getElementById("pushChangeUserButton");
 
     ui.button?.addEventListener("click", activatePush);
+    ui.changeUserButton?.addEventListener("click", changeUser);
+  }
+
+  function tryRememberedLogin() {
+    if (window.currentUser) return;
+
+    const remembered = getRememberedParticipant();
+    if (!remembered) return;
+
+    const input = document.getElementById("nameInput");
+    if (!input || typeof window.checkAccess !== "function") return;
+
+    input.value = remembered;
+    window.checkAccess();
+
+    const gateView = document.getElementById("gateView");
+    if (!gateView?.classList.contains("hidden")) {
+      forgetParticipant();
+    }
   }
 
   async function registerCurrentSubscription(OneSignal, participant) {
@@ -101,6 +161,8 @@
   async function identifyCurrentUser(OneSignal) {
     const participant = window.currentUser;
     if (!participant) return null;
+
+    rememberParticipant(participant);
 
     const externalId = participantExternalId(participant);
     await OneSignal.login(externalId);
@@ -294,6 +356,7 @@
     refresh: refreshStatus,
     identify: async (participant) => {
       window.currentUser = participant;
+      rememberParticipant(participant);
       if (!initialized || !oneSignalInstance) return;
       await identifyCurrentUser(oneSignalInstance);
       await refreshStatus();
@@ -336,5 +399,14 @@
     }
   });
 
-  document.addEventListener("DOMContentLoaded", buildPanel);
+  function initializePageHelpers() {
+    buildPanel();
+    tryRememberedLogin();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializePageHelpers);
+  } else {
+    initializePageHelpers();
+  }
 })();
