@@ -1,0 +1,48 @@
+name: Patch Safari Web ID
+
+on:
+  push:
+    branches:
+      - fix/push-safari-web-id
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/push-safari-web-id
+
+      - name: Add Safari Web ID
+        shell: python
+        run: |
+          from pathlib import Path
+          path = Path('push-notifications.js')
+          text = path.read_text(encoding='utf-8')
+          old_const = '  const ONESIGNAL_APP_ID = "b41b92ae-d914-41fe-946d-617765922f46";\n'
+          new_const = old_const + '  const ONESIGNAL_SAFARI_WEB_ID = "web.onesignal.auto.2c53d929-118c-4db5-ba77-650d97dbe49e";\n'
+          old_init = '        appId: ONESIGNAL_APP_ID,\n'
+          new_init = old_init + '        safari_web_id: ONESIGNAL_SAFARI_WEB_ID,\n'
+          if old_const not in text:
+              raise SystemExit('App ID block not found')
+          if old_init not in text:
+              raise SystemExit('OneSignal init block not found')
+          text = text.replace(old_const, new_const, 1)
+          text = text.replace(old_init, new_init, 1)
+          path.write_text(text, encoding='utf-8')
+
+      - name: Validate syntax
+        run: node --check push-notifications.js
+
+      - name: Remove workflow and commit
+        run: |
+          rm .github/workflows/patch-safari-web-id.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add push-notifications.js .github/workflows/patch-safari-web-id.yml
+          git commit -m "Aggiunge Safari Web ID a OneSignal"
+          git push origin HEAD:fix/push-safari-web-id
