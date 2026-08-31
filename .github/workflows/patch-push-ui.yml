@@ -21,62 +21,53 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
+          import re
 
           path = Path("index.html")
           text = path.read_text(encoding="utf-8")
 
-          old_init = '''  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-          <script>
+          init_pattern = re.compile(
+              r'\s*<script src="https://cdn\.onesignal\.com/sdks/web/v16/OneSignalSDK\.page\.js" defer></script>\s*'
+              r'<script>\s*window\.OneSignalDeferred = window\.OneSignalDeferred \|\| \[\];\s*'
+              r'OneSignalDeferred\.push\(async function\(OneSignal\) \{.*?'
+              r'await OneSignal\.Notifications\.requestPermission\(\);\s*\}\);\s*</script>',
+              re.S,
+          )
+          text, count = init_pattern.subn(
+              '\n<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>\n<script src="push-notifications.js" defer></script>',
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f"Patch init OneSignal non applicata: {count}")
 
-          window.OneSignalDeferred = window.OneSignalDeferred || [];
+          identity_pattern = re.compile(
+              r'\s*window\.currentUser = match;\s*window\.currentUser = match;\s*'
+              r'// Tagga questo dispositivo.*?'
+              r'window\.OneSignalDeferred\.push\(function\(OneSignal\) \{\s*'
+              r'OneSignal\.User\.addTag\("username", match\);\s*\}\);',
+              re.S,
+          )
+          text, count = identity_pattern.subn(
+              '\n    window.currentUser = match;\n    if (window.IslandaPush) {\n      void window.IslandaPush.identify(match);\n    }',
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f"Patch identità non applicata: {count}")
 
-          OneSignalDeferred.push(async function(OneSignal) {
-            await OneSignal.init({
-              appId: "b41b92ae-d914-41fe-946d-617765922f46",
-              serviceWorkerParam: { scope: "/" },
-              serviceWorkerPath: "/sw.js"
-            });
-            console.log("OneSignal inizializzato");
-            await OneSignal.Notifications.requestPermission();
-          });
-          </script>'''.replace("          ", "")
-
-          new_init = '''  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-          <script src="push-notifications.js" defer></script>'''.replace("          ", "")
-
-          old_identity = '''    window.currentUser = match;
-          window.currentUser = match;
-
-          // Tagga questo dispositivo con il nome dell'utente, per poterlo
-          // escludere/includere nelle notifiche push in futuro
-          window.OneSignalDeferred = window.OneSignalDeferred || [];
-          window.OneSignalDeferred.push(function(OneSignal) {
-            OneSignal.User.addTag("username", match);
-          });'''.replace("          ", "")
-
-          new_identity = '''    window.currentUser = match;
-          if (window.IslandaPush) {
-            void window.IslandaPush.identify(match);
-          }'''.replace("          ", "")
-
-          old_sw = '''      navigator.serviceWorker.register('sw.js').catch(() => {
-                // se il file sw.js non è presente o l'ambiente non supporta HTTPS, si ignora silenziosamente
-              });'''.replace("              ", "")
-
-          new_sw = '''      navigator.serviceWorker.register('sw.js').catch((error) => {
-                console.error('[Islanda PWA] Registrazione service worker fallita:', error);
-              });'''.replace("              ", "")
-
-          replacements = [
-              (old_init, new_init, "inizializzazione OneSignal"),
-              (old_identity, new_identity, "identità partecipante"),
-              (old_sw, new_sw, "diagnostica service worker"),
-          ]
-
-          for old, new, label in replacements:
-              if old not in text:
-                  raise SystemExit(f"Blocco non trovato: {label}")
-              text = text.replace(old, new, 1)
+          sw_pattern = re.compile(
+              r"navigator\.serviceWorker\.register\('sw\.js'\)\.catch\(\(\) => \{\s*"
+              r"// se il file sw\.js non è presente o l'ambiente non supporta HTTPS, si ignora silenziosamente\s*"
+              r"\}\);"
+          )
+          text, count = sw_pattern.subn(
+              "navigator.serviceWorker.register('sw.js').catch((error) => {\n        console.error('[Islanda PWA] Registrazione service worker fallita:', error);\n      });",
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f"Patch diagnostica SW non applicata: {count}")
 
           path.write_text(text, encoding="utf-8")
 
