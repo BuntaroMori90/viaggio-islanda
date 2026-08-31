@@ -1,6 +1,7 @@
 (() => {
   const ONESIGNAL_APP_ID = "b41b92ae-d914-41fe-946d-617765922f46";
   const ONESIGNAL_SAFARI_WEB_ID = "web.onesignal.auto.2c53d929-118c-4db5-ba77-650d97dbe49e";
+  const PUSH_REGISTRATION_URL = "https://zjwntpjpigmmnymeekxf.supabase.co/functions/v1/islanda-register-push";
 
   let oneSignalInstance = null;
   let initialized = false;
@@ -77,6 +78,26 @@
     ui.button?.addEventListener("click", activatePush);
   }
 
+  async function registerCurrentSubscription(OneSignal, participant) {
+    const subscriptionId = OneSignal.User.PushSubscription.id;
+    if (!participant || !subscriptionId) return false;
+
+    const response = await fetch(PUSH_REGISTRATION_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        participant,
+        subscription_id: subscriptionId,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`push_registration_failed:${response.status}`);
+    }
+
+    return true;
+  }
+
   async function identifyCurrentUser(OneSignal) {
     const participant = window.currentUser;
     if (!participant) return null;
@@ -85,6 +106,11 @@
     await OneSignal.login(externalId);
     OneSignal.User.addTag("username", participant);
     OneSignal.User.addTag("trip", "islanda-2026");
+
+    if (OneSignal.User.PushSubscription.id) {
+      await registerCurrentSubscription(OneSignal, participant);
+    }
+
     return externalId;
   }
 
@@ -234,10 +260,6 @@
 
       await identifyCurrentUser(OneSignal);
       await OneSignal.User.PushSubscription.optIn();
-
-      // Quando il browser crea il token dopo optIn, il listener change qui sotto
-      // esegue nuovamente login(external_id). Questa chiamata copre anche il caso
-      // in cui la subscription fosse già pronta.
       await identifyCurrentUser(OneSignal);
       await refreshStatus();
     } catch (error) {
