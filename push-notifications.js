@@ -399,7 +399,38 @@
     }
   });
 
+  function syncItineraryWithSchedule() {
+    if (typeof giorni === "undefined" || !Array.isArray(giorni)) return;
+
+    const byDay = Object.fromEntries(giorni.map((day) => [day.num, day]));
+
+    const day2 = byDay[2];
+    if (day2) {
+      day2.luogo = "Hella, Iceland";
+      day2.lat = 63.8348;
+      day2.lon = -20.40084;
+      day2.storia = "La vera partenza: si entra nel Circolo d'Oro tra parchi, crateri, laghi vulcanici e cascate. Pernottamento a Hella, buon punto per la caccia all'aurora boreale.";
+    }
+
+    const day6 = byDay[6];
+    if (day6?.meta) {
+      day6.meta.benzina = "Akureyri o Husavik";
+    }
+
+    const day8 = byDay[8];
+    if (day8) {
+      day8.luogo = "Hafnir, Iceland";
+      day8.lat = 63.9345;
+      day8.lon = -22.6879;
+      day8.storia = "Ultimo giorno di viaggio nello Snaefellsnes, poi trasferimento a Hafnir per il pernottamento prima del volo del mattino successivo. Le soste principali restano Kirkjufell, Raudfeldsgja, Arnarstapi, Budakirkja e Ytri Tunga.";
+      if (day8.meta) {
+        day8.meta.cibo = "pranzo a sacco; cena in zona Keflavik/Hafnir";
+      }
+    }
+  }
+
   function initializePageHelpers() {
+    syncItineraryWithSchedule();
     buildPanel();
     tryRememberedLogin();
   }
