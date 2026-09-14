@@ -12,6 +12,7 @@
     {match:'app utili per il viaggio',view:'utility'},
     {match:'cosa e consigliato avere con te',view:'utility'},
     {match:'la tua checklist personalizzabile',view:'utility'},
+    {match:'portafoglio viaggio',view:'altro'},
     {match:'note e commenti del gruppo',view:'altro'},
     {match:'spese di gruppo',view:'budget'},
     {match:'convertitore isk / eur',view:'utility'},
