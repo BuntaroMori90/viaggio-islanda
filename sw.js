@@ -1,4 +1,4 @@
-const CACHE_NAME = 'islanda2026-v27';
+const CACHE_NAME = 'islanda2026-v28';
 const RESTYLE_CSS = './visual-restyle.css';
 const RESTYLE_JS = './visual-restyle.js';
 const HERO_CSS = './hero-restyle.css';
@@ -69,6 +69,10 @@ function injectRestyle(response) {
   if (!contentType.includes('text/html')) return Promise.resolve(response);
 
   return response.text().then((html) => {
+    if (!html.includes('islanda-gate-preboot')) {
+      const gatePreboot = `  <style id="islanda-gate-preboot-style">html.islanda-autolog-pending #gateView{visibility:hidden!important}</style>\n  <script id="islanda-gate-preboot">(function(){var K='islanda2026_participant';try{var n=localStorage.getItem(K)||'';if(!n)return;document.documentElement.classList.add('islanda-autolog-pending');var reveal=function(){document.documentElement.classList.remove('islanda-autolog-pending')};setTimeout(reveal,1200);document.addEventListener('DOMContentLoaded',function(){try{if(!window.currentUser){var i=document.getElementById('nameInput');if(i&&typeof window.checkAccess==='function'){i.value=n;window.checkAccess();if(!document.getElementById('gateView')?.classList.contains('hidden'))localStorage.removeItem(K)}}}catch(e){}reveal()},{once:true})}catch(e){document.documentElement.classList.remove('islanda-autolog-pending')}})();<\/script>\n`;
+      html = html.replace('</head>', gatePreboot + '</head>');
+    }
     if (!html.includes('visual-restyle.css')) html = html.replace('</head>', `  <link rel="stylesheet" href="${RESTYLE_CSS}">\n</head>`);
     if (!html.includes('hero-restyle.css')) html = html.replace('</head>', `  <link rel="stylesheet" href="${HERO_CSS}">\n</head>`);
     if (!html.includes('meteo-restyle.css')) html = html.replace('</head>', `  <link rel="stylesheet" href="${METEO_CSS}">\n</head>`);
