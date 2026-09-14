@@ -1,4 +1,4 @@
-const CACHE_NAME = 'islanda2026-v17';
+const CACHE_NAME = 'islanda2026-v18';
 const RESTYLE_CSS = './visual-restyle.css';
 const RESTYLE_JS = './visual-restyle.js';
 const HERO_CSS = './hero-restyle.css';
@@ -14,6 +14,8 @@ const ITINERARY_CSS = './itinerary-restyle.css';
 const ITINERARY_JS = './itinerary-restyle.js';
 const BUDGET_CSS = './budget-restyle.css';
 const BUDGET_JS = './budget-restyle.js';
+const ALTRO_CSS = './altro-restyle.css';
+const ALTRO_JS = './altro-restyle.js';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -36,6 +38,8 @@ const CORE_ASSETS = [
   './itinerary-restyle.js',
   './budget-restyle.css',
   './budget-restyle.js',
+  './altro-restyle.css',
+  './altro-restyle.js',
 ];
 
 self.addEventListener('install', (event) => {
@@ -88,6 +92,9 @@ function injectRestyle(response) {
     if (!html.includes('budget-restyle.css')) {
       html = html.replace('</head>', `  <link rel="stylesheet" href="${BUDGET_CSS}">\n</head>`);
     }
+    if (!html.includes('altro-restyle.css')) {
+      html = html.replace('</head>', `  <link rel="stylesheet" href="${ALTRO_CSS}">\n</head>`);
+    }
     if (!html.includes('visual-restyle.js')) {
       html = html.replace('</body>', `  <script src="${RESTYLE_JS}" defer></script>\n</body>`);
     }
@@ -108,6 +115,9 @@ function injectRestyle(response) {
     }
     if (!html.includes('budget-restyle.js')) {
       html = html.replace('</body>', `  <script src="${BUDGET_JS}" defer></script>\n</body>`);
+    }
+    if (!html.includes('altro-restyle.js')) {
+      html = html.replace('</body>', `  <script src="${ALTRO_JS}" defer></script>\n</body>`);
     }
 
     const headers = new Headers(response.headers);
@@ -145,7 +155,9 @@ self.addEventListener('fetch', (event) => {
     url.pathname.endsWith('/itinerary-restyle.css') ||
     url.pathname.endsWith('/itinerary-restyle.js') ||
     url.pathname.endsWith('/budget-restyle.css') ||
-    url.pathname.endsWith('/budget-restyle.js')
+    url.pathname.endsWith('/budget-restyle.js') ||
+    url.pathname.endsWith('/altro-restyle.css') ||
+    url.pathname.endsWith('/altro-restyle.js')
   );
 
   if (isNavigazione) {
