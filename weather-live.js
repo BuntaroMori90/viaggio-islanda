@@ -72,11 +72,24 @@
     if(ui.values[1])ui.values[1].textContent='—';
     if(ui.values[2])ui.values[2].textContent='—';
     if(ui.values[3])ui.values[3].textContent=formatDuration(light);
-    if(ui.labels[0])ui.labels[0].textContent='previsioni viaggio';
-    if(ui.labels[1])ui.labels[1].textContent='probabilità max prevista';
-    if(ui.labels[2])ui.labels[2].textContent='raffica max prevista';
+    if(ui.labels[0])ui.labels[0].textContent='caricamento meteo';
+    if(ui.labels[1])ui.labels[1].textContent='caricamento meteo';
+    if(ui.labels[2])ui.labels[2].textContent='caricamento meteo';
     if(ui.labels[3])ui.labels[3].textContent='luce media · intero viaggio';
-    if(ui.note)ui.note.textContent='Carico le previsioni disponibili. La durata della luce è già calcolata sulle date e sulle tappe reali del viaggio.';
+    if(ui.note)ui.note.textContent='Carico la situazione attuale e le previsioni disponibili. La durata della luce è già calcolata sulle date reali del viaggio.';
+  }
+
+  function currentSnapshot(payload){
+    const rows=[];
+    payload.forEach(p=>{
+      const temp=Number(p?.current?.temperature_2m);
+      const gust=Number(p?.current?.wind_gusts_10m);
+      const currentTime=String(p?.current?.time||'').slice(0,13);
+      const idx=p?.hourly?.time?.findIndex(t=>String(t).slice(0,13)===currentTime)??-1;
+      const rain=idx>=0?Number(p?.hourly?.precipitation_probability?.[idx]):NaN;
+      if(Number.isFinite(temp)&&Number.isFinite(gust))rows.push({temp,gust,rain});
+    });
+    return rows;
   }
 
   async function updateWeather(){
@@ -88,7 +101,9 @@
     const lat=days.map(d=>d.lat).join(',');
     const lon=days.map(d=>d.lon).join(',');
     const daily='temperature_2m_min,temperature_2m_max,precipitation_probability_max,wind_gusts_10m_max';
-    const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&daily=${daily}&forecast_days=16&timezone=Atlantic%2FReykjavik`;
+    const current='temperature_2m,wind_gusts_10m';
+    const hourly='precipitation_probability';
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=${current}&hourly=${hourly}&daily=${daily}&forecast_days=16&timezone=Atlantic%2FReykjavik`;
 
     try{
       const response=await fetch(url,{cache:'no-store'});
@@ -120,24 +135,37 @@
         if(ui.values[0])ui.values[0].textContent=`${round(avgMin)}° / ${round(avgMax)}°`;
         if(ui.values[1])ui.values[1].textContent=`${round(rainMax)}%`;
         if(ui.values[2])ui.values[2].textContent=`${round(gustMax)} km/h`;
-        if(ui.labels[0])ui.labels[0].textContent=`min/max medie · ${covered.length}/8 giorni`;
-        if(ui.labels[1])ui.labels[1].textContent=`massima · ${covered.length}/8 giorni`;
+        if(ui.labels[0])ui.labels[0].textContent=`previsione viaggio · ${covered.length}/8 giorni`;
+        if(ui.labels[1])ui.labels[1].textContent=`pioggia max · ${covered.length}/8 giorni`;
         if(ui.labels[2])ui.labels[2].textContent=`raffica max · ${covered.length}/8 giorni`;
       }else{
-        if(ui.labels[0])ui.labels[0].textContent='fuori dal range previsionale';
-        if(ui.labels[1])ui.labels[1].textContent='fuori dal range previsionale';
-        if(ui.labels[2])ui.labels[2].textContent='fuori dal range previsionale';
+        const currentRows=currentSnapshot(payload);
+        if(currentRows.length){
+          const temps=currentRows.map(x=>x.temp);
+          const gusts=currentRows.map(x=>x.gust);
+          const rains=currentRows.map(x=>x.rain).filter(Number.isFinite);
+          if(ui.values[0])ui.values[0].textContent=`${round(Math.min(...temps))}° / ${round(Math.max(...temps))}°`;
+          if(ui.values[1])ui.values[1].textContent=rains.length?`${round(Math.max(...rains))}%`:'—';
+          if(ui.values[2])ui.values[2].textContent=`${round(Math.max(...gusts))} km/h`;
+          if(ui.labels[0])ui.labels[0].textContent='adesso · lungo il percorso';
+          if(ui.labels[1])ui.labels[1].textContent='probabilità max · adesso';
+          if(ui.labels[2])ui.labels[2].textContent='raffica max · adesso';
+        }else{
+          if(ui.labels[0])ui.labels[0].textContent='fuori dal range previsionale';
+          if(ui.labels[1])ui.labels[1].textContent='fuori dal range previsionale';
+          if(ui.labels[2])ui.labels[2].textContent='fuori dal range previsionale';
+        }
       }
 
       const now=new Intl.DateTimeFormat('it-IT',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Rome'}).format(new Date());
       if(ui.note){
         ui.note.textContent=covered.length
-          ? `Previsioni Open-Meteo disponibili per ${covered.length}/8 giorni del viaggio. La copertura cresce automaticamente man mano che le date entrano nella finestra di 16 giorni. Luce calcolata su tutte le tappe. Aggiornato alle ${now}.`
-          : `Le date del viaggio non sono ancora nella finestra previsionale di 16 giorni. I valori meteo compariranno automaticamente appena disponibili. Luce calcolata su tutte le tappe. Aggiornato alle ${now}.`;
+          ? `Previsioni del viaggio disponibili per ${covered.length}/8 giorni. La copertura cresce automaticamente fino a comprendere tutto il viaggio. Luce calcolata su tutte le tappe. Aggiornato alle ${now}.`
+          : `Le date del viaggio non sono ancora nella finestra previsionale: mostro la situazione meteo attuale lungo le tappe, non una previsione del viaggio. Appena le date entrano nei 16 giorni il riepilogo passa automaticamente alle previsioni. Aggiornato alle ${now}.`;
       }
     }catch(err){
       console.warn('[Islanda Meteo] riepilogo non disponibile',err);
-      if(ui.note)ui.note.textContent='Previsioni meteo non disponibili in questo momento: serve connessione. La durata della luce resta calcolata sulle date e sulle tappe del viaggio.';
+      if(ui.note)ui.note.textContent='Meteo non disponibile in questo momento: serve connessione. La durata della luce resta calcolata sulle date e sulle tappe del viaggio.';
     }
   }
 
