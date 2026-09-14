@@ -1,0 +1,115 @@
+/* Dati operativi compatti: meteo del punto utile, stato strade e sincronizzazione. */
+#opsLive{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 132px;
+  gap:8px;
+  margin:10px 0 0;
+}
+
+.ops-live-weather,
+.ops-road-link{
+  min-width:0;
+  min-height:66px;
+  padding:11px 12px;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:14px;
+  background:rgba(7,12,18,.52);
+}
+
+.ops-live-weather{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.ops-kicker{
+  display:block;
+  color:rgba(215,230,232,.38);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7px;
+  font-weight:700;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+}
+
+#opsWeatherValue{
+  display:block;
+  margin-top:5px;
+  color:#f7fafb;
+  font-size:13px;
+  font-weight:700;
+  line-height:1.2;
+}
+
+#opsWeatherMeta{
+  display:block;
+  margin-top:4px;
+  color:rgba(215,230,232,.48);
+  font-size:9px;
+  line-height:1.35;
+}
+
+.ops-road-link{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  color:#ff9565;
+  text-decoration:none;
+  background:rgba(255,90,31,.045);
+  border-color:rgba(255,90,31,.15);
+}
+
+.ops-road-link strong{
+  margin-top:5px;
+  font-size:12px;
+  line-height:1.15;
+}
+
+.ops-road-link small{
+  margin-top:4px;
+  color:rgba(215,230,232,.43);
+  font-size:8.5px;
+}
+
+#opsSyncStatus{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-height:22px;
+  padding:0 2px;
+  color:rgba(215,230,232,.34);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7.5px;
+  letter-spacing:.025em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+#opsSyncStatus::before{
+  content:"";
+  flex:0 0 auto;
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:#44d79a;
+  box-shadow:0 0 0 3px rgba(68,215,154,.07);
+}
+
+#opsSyncStatus[data-online="false"]::before{background:#ef737a;box-shadow:none;}
+
+.fx-live-meta{
+  margin:-4px 2px 8px;
+  color:rgba(215,230,232,.36);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7.5px;
+  line-height:1.35;
+}
+
+@media(max-width:430px){
+  #opsLive{grid-template-columns:minmax(0,1fr) 116px;}
+  .ops-live-weather,.ops-road-link{min-height:62px;padding:10px;}
+  #opsWeatherValue{font-size:12px;}
+  .ops-road-link strong{font-size:11px;}
+}
