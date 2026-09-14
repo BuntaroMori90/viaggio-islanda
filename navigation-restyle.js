@@ -1,5 +1,6 @@
 (()=>{
   const STORAGE_KEY='islanda2026_active_tab';
+  const HISTORY_KEY='islanda2026Tab';
   const trip=document.getElementById('tripView');
   if(!trip)return;
 
@@ -27,11 +28,13 @@
     {id:'altro',label:'Altro',icon:'<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>'}
   ];
 
+  const isValidTab=v=>tabs.some(t=>t.id===v);
   const getStored=()=>{try{return localStorage.getItem(STORAGE_KEY)||'home'}catch{return'home'}};
   const setStored=v=>{try{localStorage.setItem(STORAGE_KEY,v)}catch{}};
   const scrolls={};
-  let active=getStored();
-  if(!tabs.some(t=>t.id===active))active='home';
+  const stateTab=history.state?.[HISTORY_KEY];
+  let active=isValidTab(stateTab)?stateTab:getStored();
+  if(!isValidTab(active))active='home';
 
   const classify=()=>{
     let current='home';
@@ -69,7 +72,7 @@
   };
 
   const applyView=(next,{restoreScroll=true}={})=>{
-    if(!tabs.some(t=>t.id===next))next='home';
+    if(!isValidTab(next))next='home';
     scrolls[active]=window.scrollY;
     active=next;
     setStored(active);
@@ -85,10 +88,22 @@
     });
   };
 
+  const pushTab=(next)=>{
+    if(!isValidTab(next)||next===active)return;
+    const nextState={...(history.state||{}),[HISTORY_KEY]:next};
+    history.pushState(nextState,'',location.href);
+    applyView(next);
+  };
+
   nav.addEventListener('click',ev=>{
     const btn=ev.target.closest('.app-tab');
     if(!btn)return;
-    applyView(btn.dataset.tab);
+    pushTab(btn.dataset.tab);
+  });
+
+  window.addEventListener('popstate',ev=>{
+    const next=ev.state?.[HISTORY_KEY];
+    if(isValidTab(next))applyView(next);
   });
 
   const observer=new MutationObserver(()=>{
@@ -106,5 +121,6 @@
 
   classify();
   syncVisibility();
+  history.replaceState({...(history.state||{}),[HISTORY_KEY]:active},'',location.href);
   applyView(active,{restoreScroll:false});
 })();
