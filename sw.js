@@ -1,5 +1,5 @@
 const CACHE_NAME = 'islanda2026-v7';
-const RESTYLE_CSS = './visual-restyle.css?v=1';
+const RESTYLE_CSS = './visual-restyle.css';
 const CORE_ASSETS = [
   './',
   './index.html',
