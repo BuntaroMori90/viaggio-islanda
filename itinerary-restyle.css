@@ -1,0 +1,166 @@
+/* Itinerario v1: barra G1–G8 + intestazioni compatte. Solo presentazione. */
+#itineraryDayTabs{
+  position:sticky;
+  top:8px;
+  z-index:36;
+  display:flex;
+  gap:7px;
+  margin:0 0 12px;
+  padding:7px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:17px;
+  background:rgba(9,13,18,.92);
+  box-shadow:0 12px 32px rgba(0,0,0,.22);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+#itineraryDayTabs::-webkit-scrollbar{display:none;}
+.itinerary-day-tab{
+  flex:0 0 auto;
+  min-width:64px;
+  min-height:48px;
+  padding:7px 9px;
+  border:1px solid transparent;
+  border-radius:12px;
+  background:transparent;
+  color:rgba(215,230,232,.52);
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+}
+.itinerary-day-tab strong{
+  display:block;
+  color:inherit;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:12px;
+  line-height:1;
+}
+.itinerary-day-tab span{
+  display:block;
+  margin-top:5px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:7.5px;
+  line-height:1;
+  letter-spacing:.05em;
+  color:rgba(215,230,232,.38);
+}
+.itinerary-day-tab.is-active{
+  border-color:rgba(255,90,31,.34);
+  background:rgba(255,90,31,.10);
+  color:#ff8b55;
+}
+.itinerary-day-tab.is-today::after{
+  content:"";
+  display:block;
+  width:5px;
+  height:5px;
+  margin-top:5px;
+  border-radius:50%;
+  background:#44d79a;
+}
+
+#daysContainer .day{
+  margin-bottom:9px;
+  border-radius:17px;
+  overflow:hidden;
+  transition:border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+#daysContainer .day.open{
+  border-color:rgba(255,90,31,.20);
+  background:
+    linear-gradient(180deg,rgba(255,90,31,.035),rgba(255,255,255,0) 120px),
+    var(--surface-raised,#121923);
+  box-shadow:0 14px 34px rgba(0,0,0,.18);
+}
+#daysContainer .day-head{
+  position:relative;
+  min-height:72px;
+  padding:13px 15px;
+  gap:12px;
+}
+#daysContainer .day.open .day-head{
+  min-height:96px;
+  padding-top:15px;
+  padding-bottom:15px;
+}
+#daysContainer .day-num{
+  min-width:42px;
+  padding:5px 8px;
+  text-align:center;
+  border-radius:10px;
+  color:#ff9565;
+  background:rgba(255,90,31,.07);
+  border-color:rgba(255,90,31,.20);
+}
+#daysContainer .day-title{
+  color:#f7fafb;
+  font-size:14.5px;
+  font-weight:650;
+  line-height:1.25;
+}
+#daysContainer .day-sub{
+  margin-top:3px;
+  font-size:10.5px;
+  line-height:1.35;
+  color:rgba(215,230,232,.46);
+}
+#daysContainer .day-head-summary{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  margin-top:7px;
+}
+#daysContainer .day-head-summary span{
+  display:inline-flex;
+  align-items:center;
+  max-width:100%;
+  min-height:20px;
+  padding:4px 6px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.065);
+  border-radius:999px;
+  background:rgba(255,255,255,.02);
+  color:rgba(215,230,232,.48);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7.5px;
+  line-height:1.1;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#daysContainer .day-head-summary .day-head-date{
+  color:#ff9462;
+  border-color:rgba(255,90,31,.18);
+}
+#daysContainer .day-head-summary .day-head-a6[data-tone="warn"]{color:#f0a36b;border-color:rgba(240,163,107,.22);}
+#daysContainer .day-head-summary .day-head-a6[data-tone="danger"]{color:#ef737a;border-color:rgba(239,115,122,.24);}
+#daysContainer .day-head-summary .day-head-a6[data-tone="ok"]{color:#58d8a1;border-color:rgba(88,216,161,.22);}
+#daysContainer .day-arrow{margin-left:auto;}
+#daysContainer .day-body{
+  padding-left:15px;
+  padding-right:15px;
+  padding-bottom:16px;
+}
+
+@media(max-width:620px){
+  #itineraryDayTabs{
+    top:6px;
+    margin-left:-3px;
+    margin-right:-3px;
+    padding:6px;
+    border-radius:15px;
+  }
+  .itinerary-day-tab{min-width:58px;min-height:46px;padding:7px 8px;}
+  #daysContainer .day-head{padding:12px 13px;gap:10px;}
+  #daysContainer .day.open .day-head{min-height:92px;}
+  #daysContainer .day-num{min-width:39px;padding:5px 7px;font-size:9.5px;}
+  #daysContainer .day-title{font-size:14px;}
+  #daysContainer .day-head-summary span{max-width:190px;}
+  #daysContainer .day-body{padding-left:13px;padding-right:13px;padding-bottom:14px;}
+}
+
+@media(max-width:380px){
+  .itinerary-day-tab{min-width:55px;}
+  #daysContainer .day-head-summary .day-head-guide{max-width:155px;}
+}
