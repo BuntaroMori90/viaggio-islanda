@@ -1,0 +1,137 @@
+/* Meteo & Vestiario v1: solo presentazione, nessuna logica applicativa */
+#tripView .panel:has(.meteo-row){
+  position:relative;
+  overflow:hidden;
+  padding:18px;
+  border-color:rgba(255,255,255,.075);
+  background:
+    radial-gradient(circle at 100% 0%,rgba(79,211,232,.08),transparent 34%),
+    radial-gradient(circle at 0% 100%,rgba(255,90,31,.07),transparent 30%),
+    linear-gradient(180deg,rgba(255,255,255,.018),rgba(255,255,255,0)),
+    var(--surface-raised);
+}
+
+#tripView .panel:has(.meteo-row)::before{
+  content:"CLIMA DI VIAGGIO";
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  margin-bottom:13px;
+  padding:5px 8px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:999px;
+  background:rgba(255,255,255,.025);
+  color:rgba(215,230,232,.50);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7.5px;
+  letter-spacing:.12em;
+}
+
+#tripView .meteo-row{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+  margin:0;
+}
+
+#tripView .meteo-stat{
+  position:relative;
+  min-width:0;
+  min-height:116px;
+  padding:14px 12px 12px;
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:17px;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,0)),
+    rgba(7,12,18,.58);
+  text-align:left;
+  box-shadow:0 10px 26px rgba(0,0,0,.12);
+}
+
+#tripView .meteo-stat::after{
+  position:absolute;
+  top:12px;
+  right:12px;
+  color:rgba(255,255,255,.34);
+  font-family:'JetBrains Mono',monospace;
+  font-size:8px;
+  letter-spacing:.06em;
+}
+
+#tripView .meteo-stat:nth-child(1)::after{content:"TEMP";}
+#tripView .meteo-stat:nth-child(2)::after{content:"RAIN";}
+#tripView .meteo-stat:nth-child(3)::after{content:"WIND";}
+#tripView .meteo-stat:nth-child(4)::after{content:"LIGHT";}
+
+#tripView .meteo-stat .v{
+  display:block;
+  max-width:86%;
+  margin-top:30px;
+  color:#f7fafb;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:17px;
+  font-weight:700;
+  line-height:1.08;
+  letter-spacing:-.035em;
+}
+
+#tripView .meteo-stat:nth-child(1) .v,
+#tripView .meteo-stat:nth-child(2) .v{
+  color:#ff9a69;
+}
+
+#tripView .meteo-stat .l{
+  margin-top:7px;
+  color:rgba(215,230,232,.48);
+  font-size:9.5px;
+  line-height:1.35;
+}
+
+#tripView .panel:has(.meteo-row) .offline-note{
+  margin-top:13px;
+  padding:10px 12px;
+  border:1px solid rgba(255,255,255,.055);
+  border-radius:12px;
+  background:rgba(255,255,255,.018);
+  color:rgba(215,230,232,.48);
+  font-size:9.5px;
+  line-height:1.45;
+  opacity:1;
+}
+
+@media(max-width:620px){
+  #tripView .panel:has(.meteo-row){
+    padding:14px;
+  }
+
+  #tripView .meteo-row{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+  }
+
+  #tripView .meteo-stat{
+    min-height:108px;
+    padding:12px 11px 11px;
+    border-radius:15px;
+  }
+
+  #tripView .meteo-stat::after{
+    top:10px;
+    right:10px;
+  }
+
+  #tripView .meteo-stat .v{
+    margin-top:27px;
+    font-size:16px;
+  }
+}
+
+@media(max-width:390px){
+  #tripView .meteo-stat{
+    min-height:102px;
+  }
+
+  #tripView .meteo-stat .v{
+    font-size:15px;
+  }
+}
