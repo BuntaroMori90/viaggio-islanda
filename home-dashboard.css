@@ -1,0 +1,272 @@
+/* Home dashboard: compatta, operativa, senza modificare dati o logica */
+#tripView .home-dashboard-title{
+  margin-top:24px;
+}
+
+#tripView .home-dashboard{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+#tripView .home-dash-card{
+  position:relative;
+  min-width:0;
+  min-height:126px;
+  padding:15px 14px;
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:18px;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.022),rgba(255,255,255,0)),
+    rgba(15,22,32,.90);
+  box-shadow:0 10px 28px rgba(0,0,0,.13);
+  color:var(--ice);
+  text-align:left;
+  font:inherit;
+  overflow:hidden;
+}
+
+#tripView button.home-dash-card{
+  cursor:pointer;
+}
+
+#tripView button.home-dash-card:active{
+  transform:scale(.992);
+}
+
+#tripView .home-dash-card::after{
+  content:"";
+  position:absolute;
+  width:92px;
+  height:92px;
+  right:-38px;
+  bottom:-42px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,90,31,.10),transparent 68%);
+  pointer-events:none;
+}
+
+#tripView .home-dash-kicker{
+  display:block;
+  margin-bottom:8px;
+  color:rgba(215,230,232,.43);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7.5px;
+  font-weight:600;
+  letter-spacing:.10em;
+  line-height:1.25;
+}
+
+#tripView .home-dash-card strong{
+  display:block;
+  color:#f7fafb;
+  font-size:14px;
+  font-weight:700;
+  line-height:1.25;
+  letter-spacing:-.015em;
+  overflow-wrap:anywhere;
+}
+
+#tripView .home-dash-meta{
+  display:block;
+  margin-top:7px;
+  color:rgba(215,230,232,.50);
+  font-size:10px;
+  line-height:1.4;
+  overflow-wrap:anywhere;
+}
+
+#tripView .home-booking-card{
+  border-color:rgba(61,220,151,.12);
+  background:
+    radial-gradient(circle at 100% 0%,rgba(61,220,151,.07),transparent 38%),
+    linear-gradient(180deg,rgba(255,255,255,.018),rgba(255,255,255,0)),
+    rgba(15,22,32,.90);
+}
+
+#tripView .home-dash-badge{
+  display:inline-flex;
+  align-items:center;
+  min-height:20px;
+  margin-top:9px;
+  padding:3px 7px;
+  border:1px solid rgba(61,220,151,.18);
+  border-radius:999px;
+  background:rgba(61,220,151,.08);
+  color:var(--aurora-1);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7px;
+  font-weight:700;
+  letter-spacing:.07em;
+}
+
+#tripView .home-a6-card{
+  grid-column:1/-1;
+  min-height:104px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  column-gap:12px;
+  align-items:start;
+  border-left:3px solid var(--aurora-1);
+}
+
+#tripView .home-a6-card .home-dash-kicker,
+#tripView .home-a6-card strong,
+#tripView .home-a6-card .home-dash-meta{
+  grid-column:1;
+}
+
+#tripView .home-a6-state{
+  grid-column:2;
+  grid-row:1 / span 2;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:26px;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(61,220,151,.08);
+  color:var(--aurora-1);
+  font-family:'JetBrains Mono',monospace;
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.06em;
+  white-space:nowrap;
+}
+
+#tripView .home-a6-card[data-tone="warn"]{
+  border-left-color:var(--ember);
+}
+#tripView .home-a6-card[data-tone="warn"] .home-a6-state{
+  background:rgba(232,147,95,.10);
+  color:var(--ember);
+}
+#tripView .home-a6-card[data-tone="danger"]{
+  border-left-color:#ef6b73;
+}
+#tripView .home-a6-card[data-tone="danger"] .home-a6-state{
+  background:rgba(239,107,115,.10);
+  color:#ef6b73;
+}
+
+#tripView .home-quick-actions{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+
+#tripView .home-quick-actions a{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:42px;
+  padding:9px 8px;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:13px;
+  background:rgba(255,255,255,.025);
+  color:rgba(215,230,232,.62);
+  text-decoration:none;
+  font-family:'JetBrains Mono',monospace;
+  font-size:8.5px;
+  font-weight:700;
+  letter-spacing:.05em;
+}
+
+#tripView .home-quick-actions a:first-child{
+  color:#ff9462;
+  border-color:rgba(255,90,31,.16);
+  background:rgba(255,90,31,.055);
+}
+
+#tripView .home-fold-title{
+  position:relative;
+  margin-top:18px;
+  min-height:44px;
+  padding:0 2px;
+  cursor:pointer;
+  user-select:none;
+}
+
+#tripView .home-fold-title::after{
+  opacity:.55;
+}
+
+#tripView .home-fold-arrow{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:26px;
+  height:26px;
+  margin-left:auto;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:9px;
+  color:rgba(215,230,232,.46);
+  background:rgba(255,255,255,.02);
+  font-size:12px;
+  transition:transform .2s ease;
+}
+
+#tripView .home-fold-title.is-open .home-fold-arrow{
+  transform:rotate(180deg);
+}
+
+#tripView .home-fold-content{
+  display:none!important;
+}
+
+#tripView .home-fold-content.is-open{
+  display:flex!important;
+}
+
+#tripView #flightsPanel.home-fold-content.is-open{
+  display:block!important;
+}
+
+#tripView .chips.home-fold-content.is-open{
+  display:flex!important;
+}
+
+@media(max-width:620px){
+  #tripView .home-dashboard{
+    gap:8px;
+  }
+
+  #tripView .home-dash-card{
+    min-height:118px;
+    padding:13px 12px;
+    border-radius:16px;
+  }
+
+  #tripView .home-dash-card strong{
+    font-size:13px;
+  }
+
+  #tripView .home-dash-meta{
+    font-size:9.5px;
+  }
+
+  #tripView .home-a6-card{
+    min-height:98px;
+  }
+
+  #tripView .home-quick-actions a{
+    min-height:40px;
+    border-radius:12px;
+  }
+}
+
+@media(max-width:380px){
+  #tripView .home-dashboard{
+    grid-template-columns:1fr;
+  }
+
+  #tripView .home-a6-card,
+  #tripView .home-quick-actions{
+    grid-column:1;
+  }
+
+  #tripView .home-dash-card{
+    min-height:104px;
+  }
+}
