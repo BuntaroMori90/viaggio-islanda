@@ -1,58 +1,80 @@
-# Travel App Template
+# FlorinGo Travel App — Development Lab
 
-Questo branch è la base riutilizzabile della PWA viaggio, separata dalla versione Islanda pubblicata su `main`.
+Questo branch è il laboratorio della Travel App commerciale FlorinGo. È separato dalla PWA Islanda pubblicata su `main`.
 
-## Obiettivo
+## Stack scelto
 
-Per ogni nuova destinazione si mantiene il motore dell'app e si sostituiscono soltanto i dati del viaggio: date, partecipanti, voli, alloggi, prenotazioni, giornate, utility locali, valuta, meteo, emergenze e budget.
+`GitHub → Vercel → Next.js → Supabase dedicato`
 
-## Workflow per una nuova destinazione
+Flutter resta una possibile evoluzione futura del client, non una decisione necessaria adesso.
 
-1. Duplicare questa base in una nuova repository o in un nuovo progetto.
-2. Compilare `trip-config.example.js` con i dati reali.
-3. Sostituire immagini/hero e palette solo se serve.
-4. Adattare le utility alla destinazione.
-5. Configurare i dati dinamici: meteo, valuta, eventuali strade/trasporti.
-6. Collegare il backend con un `trip_id` dedicato, oppure usare un progetto Supabase separato.
-7. Verificare PWA, offline, notifiche, tasto Indietro, bottom navigation e cache version.
+## Regola principale
 
-## Cosa resta nel motore
+`main` = Islanda 2026 stabile e in uso.
 
-- navigazione Home / Itinerario / Utility / Budget / Altro
-- dashboard Home
-- itinerario a giorni e apertura automatica del giorno corrente
-- A6 / logica di riduzione del programma
-- checklist
-- note condivise
-- spese di gruppo e saldi
-- convertitore valuta
-- meteo live / previsionale
-- portafoglio viaggio
-- service worker / PWA / cache
-- notifiche
+`travel-app-template` = sviluppo commerciale, esperimenti, architettura e nuova UI.
 
-## Commercial core v0
+Le modifiche della Travel App non devono essere riportate su `main` salvo decisione esplicita.
 
-È stato avviato anche il nucleo multi-cliente in `commercial/`.
+## Obiettivo prodotto
 
-La base commerciale prevede:
+Arrivare a un flusso in cui FlorinGo possa:
 
-- Supabase Auth con Google OAuth e magic link email
-- sessione persistente sul dispositivo
-- più viaggi per account
-- ruoli `owner`, `editor`, `traveler`
-- creazione viaggio
-- inviti con link/codice
-- `trip_id` su tutti i dati operativi
-- Row Level Security per separare i clienti
-- tabelle dedicate a itinerario, alloggi, prenotazioni, checklist, note, spese e push
+`creare viaggio → inserire/progettare dati → pubblicare → cliente accede`
 
-Vedi `commercial/README.md` per setup e architettura.
+senza duplicare repository o modificare codice per ogni destinazione.
 
-## Backend
+## Frontend nuovo
 
-Per la versione commerciale la soluzione scelta è un progetto Supabase dedicato, con autenticazione reale e isolamento RLS per `trip_id`. Il database Islanda non va riutilizzato come backend multi-cliente.
+È stata avviata una base Next.js + TypeScript nella root del branch:
 
-## Stato
+- `app/layout.tsx`
+- `app/page.tsx`
+- `app/globals.css`
+- `package.json`
+- `tsconfig.json`
+- `next.config.ts`
 
-`main` resta la PWA Islanda in uso. `travel-app-template` è il laboratorio riutilizzabile e può evolvere senza rischiare l'app del viaggio Islanda.
+La prima pagina è un product shell di riferimento, non ancora la Travel App completa.
+
+## Backend commerciale
+
+Il database Islanda non va riutilizzato.
+
+La Travel App avrà un progetto Supabase dedicato con:
+
+- Supabase Auth;
+- Google OAuth + email magic link / OTP;
+- utenti multi-trip;
+- ruoli `owner`, `editor`, `traveler`;
+- `trip_id` su tutti i dati operativi;
+- RLS per isolamento completo dei clienti;
+- tabelle per itinerario, alloggi, prenotazioni, checklist, note, spese e notifiche.
+
+Il lavoro precedente in `commercial/` resta materiale di riferimento per schema e flussi, ma il frontend commerciale nuovo viene sviluppato in Next.js.
+
+## Vercel
+
+Quando collegheremo il branch/repository al progetto Vercel:
+
+- ogni sviluppo avrà una Preview Deployment;
+- il backend userà variabili d'ambiente Vercel;
+- nessuna chiave reale verrà committata;
+- prima del lancio commerciale il progetto verrà idealmente estratto in una repository dedicata.
+
+## Documenti di riferimento
+
+- `TRAVEL_APP_PRODUCT_SPEC.md` — definizione del prodotto e MVP.
+- `ARCHITECTURE.md` — architettura tecnica e strategia deployment.
+- `commercial/schema.sql` — prima base dello schema multi-cliente.
+- `.env.example` — variabili previste, senza valori reali.
+
+## Prossimi blocchi di lavoro
+
+1. creare/collegare Supabase commerciale dedicato;
+2. impostare autenticazione reale;
+3. trasformare il product shell in dashboard account;
+4. introdurre modello `trip_id` / slug;
+5. costruire il primo viaggio demo completo;
+6. aggiungere backoffice FlorinGo progressivamente;
+7. valutare Flutter solo dopo aver validato il prodotto web commerciale.
