@@ -1,6 +1,8 @@
-const CACHE_NAME = 'islanda2026-v7';
+const CACHE_NAME = 'islanda2026-v8';
 const RESTYLE_CSS = './visual-restyle.css';
 const RESTYLE_JS = './visual-restyle.js';
+const HERO_CSS = './hero-restyle.css';
+const HERO_JS = './hero-restyle.js';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -10,6 +12,8 @@ const CORE_ASSETS = [
   './push-notifications.js',
   './visual-restyle.css',
   './visual-restyle.js',
+  './hero-restyle.css',
+  './hero-restyle.js',
 ];
 
 self.addEventListener('install', (event) => {
@@ -43,8 +47,14 @@ function injectRestyle(response) {
     if (!html.includes('visual-restyle.css')) {
       html = html.replace('</head>', `  <link rel="stylesheet" href="${RESTYLE_CSS}">\n</head>`);
     }
+    if (!html.includes('hero-restyle.css')) {
+      html = html.replace('</head>', `  <link rel="stylesheet" href="${HERO_CSS}">\n</head>`);
+    }
     if (!html.includes('visual-restyle.js')) {
       html = html.replace('</body>', `  <script src="${RESTYLE_JS}" defer></script>\n</body>`);
+    }
+    if (!html.includes('hero-restyle.js')) {
+      html = html.replace('</body>', `  <script src="${HERO_JS}" defer></script>\n</body>`);
     }
 
     const headers = new Headers(response.headers);
@@ -72,7 +82,12 @@ self.addEventListener('fetch', (event) => {
   const isNavigazione = req.mode === 'navigate' || (isSameOrigin && (url.pathname.endsWith('/') || url.pathname.endsWith('.html')));
   const isPushScript = isSameOrigin && url.pathname.endsWith('/push-notifications.js');
   const isManifest = isSameOrigin && url.pathname.endsWith('/manifest.json');
-  const isRestyleAsset = isSameOrigin && (url.pathname.endsWith('/visual-restyle.css') || url.pathname.endsWith('/visual-restyle.js'));
+  const isRestyleAsset = isSameOrigin && (
+    url.pathname.endsWith('/visual-restyle.css') ||
+    url.pathname.endsWith('/visual-restyle.js') ||
+    url.pathname.endsWith('/hero-restyle.css') ||
+    url.pathname.endsWith('/hero-restyle.js')
+  );
 
   if (isNavigazione) {
     event.respondWith((async () => {
