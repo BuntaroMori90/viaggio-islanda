@@ -1,0 +1,168 @@
+/* Home hero v2: solo presentazione, nessuna logica applicativa */
+#tripView > .hero-subtitle{
+  margin:8px 0 0;
+  color:rgba(215,230,232,.58);
+  font-size:13px;
+  line-height:1.45;
+}
+
+#tripView > .top-row.hero-card{
+  min-height:248px;
+  padding:26px 28px 28px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  background:
+    linear-gradient(155deg,rgba(255,90,31,.17) 0%,rgba(255,90,31,.04) 28%,rgba(10,14,20,.10) 46%,rgba(9,13,18,.82) 100%),
+    radial-gradient(circle at 76% 10%,rgba(79,211,232,.13),transparent 30%),
+    radial-gradient(circle at 105% 80%,rgba(124,111,224,.10),transparent 36%),
+    linear-gradient(145deg,#182130 0%,#101721 55%,#0a0f16 100%);
+}
+
+#tripView > .top-row.hero-card::before{
+  width:250px;
+  height:250px;
+  right:-88px;
+  top:-104px;
+  border-color:rgba(255,255,255,.055);
+  box-shadow:
+    0 0 0 34px rgba(255,255,255,.014),
+    0 0 0 70px rgba(255,90,31,.022),
+    0 0 70px rgba(79,211,232,.05);
+}
+
+#tripView > .top-row.hero-card::after{
+  bottom:20px;
+  background:linear-gradient(90deg,rgba(255,90,31,.72),rgba(255,255,255,.09) 42%,transparent 88%);
+}
+
+#tripView .hero-meta{
+  position:absolute;
+  top:24px;
+  left:28px;
+  z-index:2;
+  max-width:calc(100% - 120px);
+}
+
+#tripView .hero-meta-kicker{
+  margin-bottom:7px;
+  color:rgba(255,255,255,.54);
+  font-family:'JetBrains Mono',monospace;
+  font-size:8.5px;
+  line-height:1;
+  letter-spacing:.15em;
+}
+
+#tripView .hero-meta-dates{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  color:#fff;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:-.02em;
+}
+
+#tripView .hero-meta-dates i{
+  color:var(--brand-2);
+  font-style:normal;
+  font-weight:500;
+}
+
+#tripView .hero-meta-facts{
+  display:flex;
+  gap:7px;
+  margin-top:10px;
+}
+
+#tripView .hero-meta-facts span{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:5px 8px;
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:999px;
+  background:rgba(4,8,12,.24);
+  color:rgba(255,255,255,.58);
+  font-family:'JetBrains Mono',monospace;
+  font-size:8px;
+  letter-spacing:.05em;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+
+#tripView > .top-row.hero-card .countdown{
+  padding-bottom:12px;
+}
+
+#tripView > .top-row.hero-card .countdown .num{
+  font-size:78px;
+}
+
+#tripView > .top-row.hero-card .countdown .lbl{
+  max-width:190px;
+  color:rgba(255,255,255,.62);
+}
+
+#tripView > .top-row.hero-card .live-weather.show{
+  max-width:270px;
+}
+
+@media(max-width:620px){
+  #tripView > .hero-subtitle{
+    margin-top:7px;
+    font-size:12px;
+  }
+
+  #tripView > .top-row.hero-card{
+    min-height:270px;
+    padding:22px 20px 26px;
+  }
+
+  #tripView .hero-meta{
+    top:20px;
+    left:20px;
+    max-width:calc(100% - 92px);
+  }
+
+  #tripView .hero-meta-dates{
+    gap:6px;
+    font-size:14px;
+  }
+
+  #tripView .hero-meta-facts{
+    margin-top:8px;
+  }
+
+  #tripView > .top-row.hero-card .countdown{
+    margin-top:92px;
+    padding-bottom:0;
+  }
+
+  #tripView > .top-row.hero-card .countdown .num{
+    font-size:72px;
+  }
+
+  #tripView > .top-row.hero-card .live-weather.show{
+    max-width:none;
+  }
+}
+
+@media(max-width:390px){
+  #tripView > .top-row.hero-card{
+    min-height:258px;
+  }
+
+  #tripView .hero-meta-dates{
+    font-size:13px;
+  }
+
+  #tripView .hero-meta-facts span{
+    font-size:7.5px;
+  }
+
+  #tripView > .top-row.hero-card .countdown .num{
+    font-size:66px;
+  }
+}
