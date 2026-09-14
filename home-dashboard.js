@@ -8,10 +8,10 @@
   let refreshTimer=null;
 
   const flightEvents=[
-    {at:'2026-09-29T21:00:00+02:00',title:'Napoli → Londra',meta:'Ryanair FR5456 · 21:00'},
-    {at:'2026-09-30T06:15:00+01:00',title:'Londra Luton → Keflavík',meta:'easyJet EZY2635 · 06:15'},
-    {at:'2026-10-08T10:15:00Z',title:'Keflavík → Milano Malpensa',meta:'easyJet EJU3970 · 10:15'},
-    {at:'2026-10-08T21:25:00+02:00',title:'Milano Malpensa → Napoli',meta:'Ryanair FR5972 · 21:25'}
+    {at:'2026-09-29T21:00:00+02:00',label:'29 SET · 21:00',title:'Napoli → Londra',meta:'Ryanair FR5456 · 21:00'},
+    {at:'2026-09-30T06:15:00+01:00',label:'30 SET · 06:15',title:'Londra Luton → Keflavík',meta:'easyJet EZY2635 · 06:15'},
+    {at:'2026-10-08T10:15:00Z',label:'8 OTT · 10:15',title:'Keflavík → Milano Malpensa',meta:'easyJet EJU3970 · 10:15'},
+    {at:'2026-10-08T21:25:00+02:00',label:'8 OTT · 21:25',title:'Milano Malpensa → Napoli',meta:'Ryanair FR5972 · 21:25'}
   ];
 
   const reservations=[
@@ -24,7 +24,6 @@
   ];
 
   const normalize=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
-  const pad=n=>String(n).padStart(2,'0');
   const dateToUtc=d=>Date.parse(`${d}T00:00:00Z`);
 
   const icelandNow=()=>{
@@ -41,11 +40,10 @@
     return Math.floor((dateToUtc(now.date)-dateToUtc(TRIP_START))/DAY_MS)+1;
   };
 
-  const formatDateTime=(iso,{iceland=false}={})=>{
+  const formatDateTime=(iso)=>{
     const d=new Date(iso);
     const parts=new Intl.DateTimeFormat('it-IT',{
-      timeZone:iceland?'Atlantic/Reykjavik':undefined,
-      day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false
+      timeZone:'Atlantic/Reykjavik',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false
     }).formatToParts(d);
     const o=Object.fromEntries(parts.filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
     return `${o.day} ${String(o.month||'').toUpperCase()} · ${o.hour}:${o.minute}`;
@@ -68,7 +66,7 @@
     const inTrip=now.date>=TRIP_START&&now.date<=TRIP_END;
     if(!inTrip){
       const e=nextGlobalEvent();
-      return {kicker:'PROSSIMO EVENTO',title:e?.title||'Partenza',meta:e?formatDateTime(e.at,{iceland:e.at.endsWith('Z')}):'29 SET · 21:00',day:1};
+      return {kicker:'PROSSIMO EVENTO',title:e?.title||'Partenza',meta:e?.label||'29 SET · 21:00',day:1};
     }
 
     try{
@@ -88,7 +86,7 @@
   const nextReservation=()=>{
     const now=Date.now();
     const r=reservations.map(x=>({...x,ms:Date.parse(x.at)})).find(x=>x.ms>=now)||reservations.at(-1);
-    return {...r,label:formatDateTime(r.at,{iceland:true})};
+    return {...r,label:formatDateTime(r.at)};
   };
 
   const a6State=()=>{
@@ -97,7 +95,7 @@
     let g=null;
     try{ if(typeof giorni!=='undefined'&&Array.isArray(giorni))g=giorni.find(x=>x.num===dayNum); }catch(_){}
     const cutoffs=(g?.cutoffs||[]).map(c=>({...c,min:parseStartMin(c.time)})).filter(c=>c.min!==null).sort((a,b)=>a.min-b.min);
-    const isToday=now.date>=TRIP_START&&now.date<=TRIP_END&&dayNum===Math.floor((dateToUtc(now.date)-dateToUtc(TRIP_START))/DAY_MS)+1;
+    const isToday=now.date>=TRIP_START&&now.date<=TRIP_END;
 
     if(!cutoffs.length){
       return {label:now.date<TRIP_START?'PROGRAMMATO':'NORMALE',title:`G${dayNum} · Nessuna soglia critica`,meta:g?.cutoffEmpty||'Giornata flessibile. Segui programma, meteo e condizioni reali.',tone:'ok',day:dayNum};
@@ -181,13 +179,15 @@
   };
 
   const reorderHome=()=>{
+    if(trip.dataset.homeReordered==='1')return;
     const titles=[...trip.querySelectorAll(':scope > .section-title')];
     const equip=titles.find(x=>normalize(x.textContent).includes('equipaggio'));
     const meteo=titles.find(x=>normalize(x.textContent).includes('meteo & vestiario'));
     const meteoPanel=meteo?.nextElementSibling;
-    if(equip&&meteo&&meteoPanel&&meteo!==equip.previousElementSibling){
+    if(equip&&meteo&&meteoPanel){
       trip.insertBefore(meteo,equip);
       trip.insertBefore(meteoPanel,equip);
+      trip.dataset.homeReordered='1';
     }
   };
 
@@ -248,7 +248,7 @@
     set('dashA6Title',a6.title);
     set('dashA6Meta',a6.meta);
     const card=document.getElementById('dashA6Card');
-    if(card){card.dataset.tone=a6.tone;}
+    if(card)card.dataset.tone=a6.tone;
     const maps=document.getElementById('dashMapsLink');
     if(maps)maps.href=currentMap();
   };
@@ -266,7 +266,6 @@
     });
 
     const obs=new MutationObserver(()=>{
-      reorderHome();
       makeFold('equipaggio','equipaggio');
       makeFold('voli','voli');
       ensureDashboard();
