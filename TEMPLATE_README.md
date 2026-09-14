@@ -31,10 +31,28 @@ Per ogni nuova destinazione si mantiene il motore dell'app e si sostituiscono so
 - service worker / PWA / cache
 - notifiche
 
+## Commercial core v0
+
+È stato avviato anche il nucleo multi-cliente in `commercial/`.
+
+La base commerciale prevede:
+
+- Supabase Auth con Google OAuth e magic link email
+- sessione persistente sul dispositivo
+- più viaggi per account
+- ruoli `owner`, `editor`, `traveler`
+- creazione viaggio
+- inviti con link/codice
+- `trip_id` su tutti i dati operativi
+- Row Level Security per separare i clienti
+- tabelle dedicate a itinerario, alloggi, prenotazioni, checklist, note, spese e push
+
+Vedi `commercial/README.md` per setup e architettura.
+
 ## Backend
 
-Per evitare che viaggi diversi condividano per errore note, checklist o spese, la soluzione consigliata è aggiungere `trip_id` alle tabelle dinamiche. In alternativa si può usare un backend separato per ogni viaggio.
+Per la versione commerciale la soluzione scelta è un progetto Supabase dedicato, con autenticazione reale e isolamento RLS per `trip_id`. Il database Islanda non va riutilizzato come backend multi-cliente.
 
 ## Stato
 
-Questo branch nasce dalla versione stabile Islanda v21. Non è il branch pubblicato per il viaggio Islanda e può essere evoluto senza rischiare la PWA in uso.
+`main` resta la PWA Islanda in uso. `travel-app-template` è il laboratorio riutilizzabile e può evolvere senza rischiare l'app del viaggio Islanda.
