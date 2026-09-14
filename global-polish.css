@@ -1,0 +1,280 @@
+/* Global polish v1 — coerenza visiva senza modificare dati o logica */
+:root{
+  --ui-radius-card:18px;
+  --ui-radius-control:12px;
+  --ui-border:rgba(255,255,255,.075);
+  --ui-border-strong:rgba(255,255,255,.11);
+  --ui-muted:rgba(215,230,232,.50);
+  --ui-muted-2:rgba(215,230,232,.36);
+  --ui-surface:rgba(15,22,32,.90);
+  --ui-surface-soft:rgba(7,12,18,.58);
+  --ui-orange:#ff9565;
+  --ui-green:#58d8a1;
+  --ui-red:#ef737a;
+}
+
+html{scroll-padding-top:78px;}
+body{-webkit-tap-highlight-color:transparent;}
+#tripView{overflow-x:hidden;}
+
+/* Ritmo generale */
+#tripView .section-title{
+  margin-top:26px;
+  margin-bottom:10px;
+  min-height:24px;
+  font-size:9px;
+  letter-spacing:.135em;
+}
+#tripView .section-title:first-of-type{margin-top:24px;}
+
+#tripView > .panel,
+#tripView [data-app-view] + .panel,
+#tripView #pushPanel .panel{
+  border-radius:var(--ui-radius-card);
+}
+
+/* Controlli coerenti e comodi al tocco */
+#tripView button,
+#tripView a,
+#tripView input,
+#tripView select,
+#tripView textarea{
+  -webkit-tap-highlight-color:transparent;
+}
+#tripView button,
+#tripView a{touch-action:manipulation;}
+#tripView input,
+#tripView select,
+#tripView textarea{
+  font-size:14px;
+}
+#tripView input:not([type="checkbox"]),
+#tripView select,
+#tripView textarea{
+  min-height:44px;
+  border-radius:var(--ui-radius-control)!important;
+}
+#tripView textarea{line-height:1.45;}
+
+#tripView button:focus-visible,
+#tripView a:focus-visible,
+#tripView input:focus-visible,
+#tripView select:focus-visible,
+#tripView textarea:focus-visible{
+  outline:2px solid rgba(255,149,101,.78);
+  outline-offset:2px;
+}
+
+/* Home */
+#tripView .home-dashboard{margin-top:1px;}
+#tripView .home-dash-card,
+#travelWallet .travel-wallet-card,
+.budget-hero,
+.budget-stat{
+  border-color:var(--ui-border);
+}
+#tripView .home-dash-card strong,
+.travel-wallet-card strong,
+#daysContainer .day-title{
+  letter-spacing:-.012em;
+}
+#tripView .home-quick-actions a{
+  font-size:8px;
+  letter-spacing:.065em;
+}
+
+/* Utility: blocchi compatti e coerenti */
+#appsContainer{
+  margin-top:1px;
+}
+#appsContainer > div{
+  border-radius:16px!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.10);
+}
+#appsContainer > div:active{transform:scale(.99);}
+
+#tripView .packing-collapsible,
+#tripView .packing-content,
+#tripView .checklist{
+  border-radius:16px;
+}
+
+/* Convertitore */
+#iskInput{
+  min-width:0!important;
+  background:var(--ui-surface-soft)!important;
+  border-color:var(--ui-border)!important;
+}
+#eurOutput{
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  border-radius:var(--ui-radius-control)!important;
+  color:var(--ui-green)!important;
+  background:rgba(88,216,161,.055)!important;
+  border-color:rgba(88,216,161,.13)!important;
+}
+
+/* Itinerario */
+#itineraryDayTabs{
+  scrollbar-gutter:stable;
+}
+#daysContainer .day{
+  border-color:var(--ui-border);
+}
+#daysContainer .day-head{
+  transition:background .16s ease;
+}
+#daysContainer .day-head:active{
+  background:rgba(255,255,255,.018);
+}
+#daysContainer .day-body{
+  color:rgba(247,250,251,.92);
+}
+#daysContainer .story,
+#daysContainer .day-sub,
+#daysContainer .schedule td.n,
+#daysContainer .meta-row{
+  color:var(--ui-muted);
+}
+#daysContainer .schedule{
+  margin-top:2px;
+}
+#daysContainer .schedule td{
+  line-height:1.35;
+}
+#daysContainer .schedule td.t{
+  color:#ff9b6d;
+}
+#daysContainer .trigger{
+  border-radius:12px;
+  background:rgba(7,12,18,.54);
+}
+#daysContainer .mbs-col{
+  min-width:0;
+}
+
+/* Budget */
+#budgetOverview,
+#budgetMacroGrid{align-items:stretch;}
+.budget-stat,
+.budget-macro{transition:border-color .16s ease,background .16s ease;}
+#expensesList .exp-row{
+  align-items:center;
+}
+#expensesList .del-btn{
+  min-width:34px;
+  min-height:34px;
+  border-radius:10px;
+}
+#balancesBox,
+#settlementsBox:not(:empty){
+  line-height:1.45;
+}
+
+/* Altro */
+.travel-wallet-card:active{transform:scale(.992);}
+.travel-wallet-details > button{
+  min-height:54px;
+}
+.travel-wallet-details-body{
+  color:rgba(247,250,251,.92);
+}
+.travel-wallet-row small{
+  color:var(--ui-muted);
+}
+
+/* Note */
+#notesList > *{
+  border-radius:13px;
+}
+#noteInput{
+  background:var(--ui-surface-soft)!important;
+  border-color:var(--ui-border)!important;
+}
+.btn-send{
+  min-height:44px;
+  border-radius:12px!important;
+}
+
+/* Bottom nav: più stabile e leggibile */
+.app-bottom-nav{
+  border-color:rgba(255,255,255,.095);
+  box-shadow:0 16px 42px rgba(0,0,0,.38);
+}
+.app-tab{
+  transition:background .16s ease,color .16s ease,transform .12s ease;
+}
+.app-tab:active{transform:scale(.96);}
+.app-tab.is-active{
+  background:rgba(255,90,31,.115);
+  color:#ffa173;
+}
+
+/* Evita che elementi inline lunghi allarghino la pagina */
+#tripView .panel,
+#tripView .day,
+#tripView .home-dash-card,
+#tripView .travel-wallet-card,
+#tripView .budget-macro,
+#tripView .budget-stat{
+  min-width:0;
+}
+#tripView strong,
+#tripView small,
+#tripView .wallet-meta,
+#tripView .home-dash-meta{
+  overflow-wrap:anywhere;
+}
+
+@media(max-width:620px){
+  html{scroll-padding-top:70px;}
+  #tripView .section-title{
+    margin-top:22px;
+    margin-bottom:9px;
+  }
+  #tripView > .panel{
+    padding:15px 14px;
+  }
+  #tripView .home-dashboard,
+  #travelWallet,
+  #budgetOverview,
+  #budgetMacroGrid{
+    gap:8px;
+  }
+  #appsContainer > div{
+    min-height:88px!important;
+    padding:11px!important;
+  }
+  #daysContainer .schedule td{
+    padding-left:6px;
+    padding-right:6px;
+  }
+  #daysContainer .mbs{
+    gap:7px;
+  }
+  #daysContainer .mbs-col ul{
+    font-size:11.5px;
+  }
+  .app-bottom-nav{
+    bottom:max(7px,env(safe-area-inset-bottom));
+  }
+}
+
+@media(max-width:390px){
+  #tripView .section-title{font-size:8.5px;}
+  #daysContainer .mbs{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  #daysContainer .mbs-col .mbs-lbl{font-size:8.5px;}
+  #daysContainer .mbs-col ul{font-size:10.8px;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
