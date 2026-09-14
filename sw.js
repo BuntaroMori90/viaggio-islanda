@@ -1,4 +1,5 @@
-const CACHE_NAME = 'islanda2026-v6';
+const CACHE_NAME = 'islanda2026-v7';
+const RESTYLE_CSS = './visual-restyle.css?v=1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -6,6 +7,7 @@ const CORE_ASSETS = [
   './icon-192.png',
   './icon-512.png',
   './push-notifications.js',
+  './visual-restyle.css',
 ];
 
 self.addEventListener('install', (event) => {
@@ -16,21 +18,48 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
-      )
-    )
-  );
-  self.clients.claim();
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)));
+    await self.clients.claim();
+
+    // Un solo reload automatico quando entra in funzione questa nuova versione:
+    // chi ha già installato la PWA riceve il restyling senza reinstallare nulla.
+    const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    await Promise.all(clients.map(async (client) => {
+      try { await client.navigate(client.url); } catch (_) {}
+    }));
+  })());
 });
 
+function injectRestyle(response) {
+  if (!response) return Promise.resolve(response);
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('text/html')) return Promise.resolve(response);
+
+  return response.text().then((html) => {
+    if (!html.includes('visual-restyle.css')) {
+      html = html.replace('</head>', `  <link rel="stylesheet" href="${RESTYLE_CSS}">\n</head>`);
+    }
+
+    const headers = new Headers(response.headers);
+    headers.delete('content-length');
+    headers.delete('content-encoding');
+    headers.delete('etag');
+
+    return new Response(html, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
+  });
+}
+
 // Strategia:
-// - HTML, manifest e push-notifications.js: network-first, così installazione,
-//   login e push usano subito la versione più recente quando c'è connessione.
-// - Altri asset locali: cache-first, con aggiornamento in background.
-// - Risorse esterne (meteo, Supabase, font): network-first.
+// - HTML: network-first + iniezione del solo foglio grafico del restyling.
+// - manifest e push-notifications.js: network-first, come prima.
+// - altri asset locali: cache-first con aggiornamento in background.
+// - logica, dati, Supabase, mappe e notifiche non vengono modificati.
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
@@ -39,7 +68,20 @@ self.addEventListener('fetch', (event) => {
   const isPushScript = isSameOrigin && url.pathname.endsWith('/push-notifications.js');
   const isManifest = isSameOrigin && url.pathname.endsWith('/manifest.json');
 
-  if (isNavigazione || isPushScript || isManifest) {
+  if (isNavigazione) {
+    event.respondWith((async () => {
+      try {
+        const networkResponse = await fetch(req);
+        const styledResponse = await injectRestyle(networkResponse);
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(req, styledResponse.clone());
+        return styledResponse;
+      } catch (_) {
+        const cached = await caches.match(req);
+        return cached ? injectRestyle(cached) : Response.error();
+      }
+    })());
+  } else if (isPushScript || isManifest) {
     event.respondWith(
       fetch(req).then((res) => {
         const resClone = res.clone();
