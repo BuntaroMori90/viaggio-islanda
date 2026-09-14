@@ -1,4 +1,4 @@
-const CACHE_NAME = 'islanda2026-v20';
+const CACHE_NAME = 'islanda2026-v21';
 const RESTYLE_CSS = './visual-restyle.css';
 const RESTYLE_JS = './visual-restyle.js';
 const HERO_CSS = './hero-restyle.css';
@@ -17,6 +17,9 @@ const BUDGET_JS = './budget-restyle.js';
 const ALTRO_CSS = './altro-restyle.css';
 const ALTRO_JS = './altro-restyle.js';
 const POLISH_CSS = './global-polish.css';
+const OPS_CSS = './ops-live.css';
+const OPS_JS = './ops-live.js';
+const FX_JS = './currency-live.js';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -42,6 +45,9 @@ const CORE_ASSETS = [
   './altro-restyle.css',
   './altro-restyle.js',
   './global-polish.css',
+  './ops-live.css',
+  './ops-live.js',
+  './currency-live.js',
 ];
 
 self.addEventListener('install', (event) => {
@@ -100,6 +106,9 @@ function injectRestyle(response) {
     if (!html.includes('global-polish.css')) {
       html = html.replace('</head>', `  <link rel="stylesheet" href="${POLISH_CSS}">\n</head>`);
     }
+    if (!html.includes('ops-live.css')) {
+      html = html.replace('</head>', `  <link rel="stylesheet" href="${OPS_CSS}">\n</head>`);
+    }
     if (!html.includes('visual-restyle.js')) {
       html = html.replace('</body>', `  <script src="${RESTYLE_JS}" defer></script>\n</body>`);
     }
@@ -123,6 +132,12 @@ function injectRestyle(response) {
     }
     if (!html.includes('altro-restyle.js')) {
       html = html.replace('</body>', `  <script src="${ALTRO_JS}" defer></script>\n</body>`);
+    }
+    if (!html.includes('ops-live.js')) {
+      html = html.replace('</body>', `  <script src="${OPS_JS}" defer></script>\n</body>`);
+    }
+    if (!html.includes('currency-live.js')) {
+      html = html.replace('</body>', `  <script src="${FX_JS}" defer></script>\n</body>`);
     }
 
     const headers = new Headers(response.headers);
@@ -163,7 +178,10 @@ self.addEventListener('fetch', (event) => {
     url.pathname.endsWith('/budget-restyle.js') ||
     url.pathname.endsWith('/altro-restyle.css') ||
     url.pathname.endsWith('/altro-restyle.js') ||
-    url.pathname.endsWith('/global-polish.css')
+    url.pathname.endsWith('/global-polish.css') ||
+    url.pathname.endsWith('/ops-live.css') ||
+    url.pathname.endsWith('/ops-live.js') ||
+    url.pathname.endsWith('/currency-live.js')
   );
 
   if (isNavigazione) {
