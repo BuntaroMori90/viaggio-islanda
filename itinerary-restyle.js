@@ -51,7 +51,8 @@
     }
     const g=getData(n),a6=a6Info(el,n);
     const guide=String(g?.meta?.guida||'').trim();
-    summary.innerHTML=`<span class="day-head-date">${fullDates[n]||''}</span>${guide?`<span class="day-head-guide">${guide}</span>`:''}<span class="day-head-a6" data-tone="${a6.tone}">${a6.label}</span>`;
+    const html=`<span class="day-head-date">${fullDates[n]||''}</span>${guide?`<span class="day-head-guide">${guide}</span>`:''}<span class="day-head-a6" data-tone="${a6.tone}">${a6.label}</span>`;
+    if(summary.innerHTML!==html)summary.innerHTML=html;
   };
 
   const setActiveTab=n=>{
