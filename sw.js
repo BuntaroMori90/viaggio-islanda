@@ -1,4 +1,4 @@
-const CACHE_NAME = 'islanda2026-v8';
+const CACHE_NAME = 'islanda2026-v9';
 const RESTYLE_CSS = './visual-restyle.css';
 const RESTYLE_JS = './visual-restyle.js';
 const HERO_CSS = './hero-restyle.css';
@@ -29,8 +29,6 @@ self.addEventListener('activate', (event) => {
     await Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)));
     await self.clients.claim();
 
-    // Un solo reload automatico quando entra in funzione una nuova versione:
-    // chi ha già installato la PWA riceve il restyling senza reinstallare nulla.
     const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     await Promise.all(clients.map(async (client) => {
       try { await client.navigate(client.url); } catch (_) {}
@@ -70,11 +68,6 @@ function injectRestyle(response) {
   });
 }
 
-// Strategia:
-// - HTML: network-first + iniezione degli asset puramente grafici del restyling.
-// - manifest, push-notifications.js e asset visuali: network-first.
-// - altri asset locali: cache-first con aggiornamento in background.
-// - logica, dati, Supabase, mappe e notifiche restano separati dal restyling.
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
