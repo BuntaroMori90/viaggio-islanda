@@ -3,7 +3,7 @@
 .app-bottom-nav{
   position:fixed;
   left:50%;
-  bottom:0;
+  bottom:-1px;
   z-index:1200;
   display:none;
   width:min(820px,100%);
@@ -16,15 +16,28 @@
   border-bottom:0;
   border-top-color:rgba(255,90,31,.13);
   border-radius:22px 22px 0 0;
-  background:rgba(8,12,17,.975);
+  background:rgb(8,12,17);
   box-shadow:0 -10px 34px rgba(0,0,0,.30),0 -1px 0 rgba(255,90,31,.035);
   backdrop-filter:blur(20px);
   -webkit-backdrop-filter:blur(20px);
+  isolation:isolate;
+}
+.app-bottom-nav::after{
+  content:"";
+  position:absolute;
+  left:-1px;
+  right:-1px;
+  bottom:-42px;
+  height:44px;
+  background:rgb(8,12,17);
+  pointer-events:none;
+  z-index:0;
 }
 .app-bottom-nav.is-visible{display:grid;}
 
 .app-tab{
   position:relative;
+  z-index:1;
   min-width:0;
   min-height:52px;
   padding:6px 4px;
@@ -112,7 +125,7 @@ body:has(.app-bottom-nav.is-visible) #tripView{
 
 @media(max-width:620px){
   .app-bottom-nav{
-    bottom:0;
+    bottom:-1px;
     width:100%;
     min-height:68px;
     padding-left:8px;
