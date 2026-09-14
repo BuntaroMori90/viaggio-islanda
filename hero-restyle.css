@@ -1,4 +1,4 @@
-/* Home hero v2: solo presentazione, nessuna logica applicativa */
+/* Home hero v3: foto reale Islanda + countdown live. Nessuna logica applicativa modificata. */
 #tripView > .hero-subtitle{
   margin:8px 0 0;
   color:rgba(215,230,232,.58);
@@ -7,33 +7,36 @@
 }
 
 #tripView > .top-row.hero-card{
-  min-height:248px;
+  min-height:300px;
   padding:26px 28px 28px;
   display:flex;
   align-items:flex-end;
   justify-content:space-between;
   background:
-    linear-gradient(155deg,rgba(255,90,31,.17) 0%,rgba(255,90,31,.04) 28%,rgba(10,14,20,.10) 46%,rgba(9,13,18,.82) 100%),
-    radial-gradient(circle at 76% 10%,rgba(79,211,232,.13),transparent 30%),
-    radial-gradient(circle at 105% 80%,rgba(124,111,224,.10),transparent 36%),
+    linear-gradient(180deg,rgba(6,10,15,.16) 0%,rgba(7,11,16,.30) 38%,rgba(7,11,16,.84) 100%),
+    linear-gradient(110deg,rgba(255,90,31,.14) 0%,transparent 40%),
+    url('https://images.unsplash.com/photo-1488758531615-980d8775ea2f?auto=format&fit=crop&fm=jpg&q=82&w=1800') center 46% / cover no-repeat,
     linear-gradient(145deg,#182130 0%,#101721 55%,#0a0f16 100%);
 }
 
 #tripView > .top-row.hero-card::before{
-  width:250px;
-  height:250px;
-  right:-88px;
-  top:-104px;
-  border-color:rgba(255,255,255,.055);
-  box-shadow:
-    0 0 0 34px rgba(255,255,255,.014),
-    0 0 0 70px rgba(255,90,31,.022),
-    0 0 70px rgba(79,211,232,.05);
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  width:auto;
+  height:auto;
+  border:0;
+  border-radius:inherit;
+  background:
+    linear-gradient(90deg,rgba(7,11,16,.62) 0%,rgba(7,11,16,.16) 54%,rgba(7,11,16,.38) 100%),
+    radial-gradient(circle at 80% 18%,rgba(79,211,232,.10),transparent 34%);
+  box-shadow:none;
 }
 
 #tripView > .top-row.hero-card::after{
   bottom:20px;
-  background:linear-gradient(90deg,rgba(255,90,31,.72),rgba(255,255,255,.09) 42%,transparent 88%);
+  background:linear-gradient(90deg,rgba(255,90,31,.82),rgba(255,255,255,.12) 44%,transparent 90%);
 }
 
 #tripView .hero-meta{
@@ -42,11 +45,12 @@
   left:28px;
   z-index:2;
   max-width:calc(100% - 120px);
+  text-shadow:0 3px 18px rgba(0,0,0,.45);
 }
 
 #tripView .hero-meta-kicker{
   margin-bottom:7px;
-  color:rgba(255,255,255,.54);
+  color:rgba(255,255,255,.66);
   font-family:'JetBrains Mono',monospace;
   font-size:8.5px;
   line-height:1;
@@ -81,10 +85,10 @@
   align-items:center;
   min-height:24px;
   padding:5px 8px;
-  border:1px solid rgba(255,255,255,.075);
+  border:1px solid rgba(255,255,255,.13);
   border-radius:999px;
-  background:rgba(4,8,12,.24);
-  color:rgba(255,255,255,.58);
+  background:rgba(4,8,12,.38);
+  color:rgba(255,255,255,.72);
   font-family:'JetBrains Mono',monospace;
   font-size:8px;
   letter-spacing:.05em;
@@ -92,17 +96,64 @@
   -webkit-backdrop-filter:blur(10px);
 }
 
-#tripView > .top-row.hero-card .countdown{
-  padding-bottom:12px;
+#tripView > .top-row.hero-card .countdown-live{
+  width:min(100%,460px);
+  margin:0;
+  padding:0 0 12px;
+  display:block;
+  text-shadow:0 4px 18px rgba(0,0,0,.45);
 }
 
-#tripView > .top-row.hero-card .countdown .num{
-  font-size:78px;
+#tripView .countdown-kicker{
+  margin-bottom:8px;
+  color:rgba(255,255,255,.70);
+  font-family:'JetBrains Mono',monospace;
+  font-size:8.5px;
+  font-weight:600;
+  letter-spacing:.15em;
 }
 
-#tripView > .top-row.hero-card .countdown .lbl{
-  max-width:190px;
-  color:rgba(255,255,255,.62);
+#tripView .countdown-grid{
+  display:grid;
+  grid-template-columns:1.18fr repeat(3,1fr);
+  gap:7px;
+}
+
+#tripView .countdown-unit{
+  min-width:0;
+  padding:10px 9px 9px;
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:14px;
+  background:rgba(6,10,15,.42);
+  box-shadow:0 10px 28px rgba(0,0,0,.16);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+
+#tripView .countdown-unit strong{
+  display:block;
+  color:#fff;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:28px;
+  font-weight:700;
+  line-height:1;
+  letter-spacing:-.055em;
+  font-variant-numeric:tabular-nums;
+}
+
+#tripView .countdown-days strong{
+  color:#fff;
+  font-size:38px;
+}
+
+#tripView .countdown-unit span{
+  display:block;
+  margin-top:5px;
+  color:rgba(255,255,255,.58);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7.5px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
 }
 
 #tripView > .top-row.hero-card .live-weather.show{
@@ -116,8 +167,9 @@
   }
 
   #tripView > .top-row.hero-card{
-    min-height:270px;
+    min-height:330px;
     padding:22px 20px 26px;
+    background-position:center 48%;
   }
 
   #tripView .hero-meta{
@@ -135,13 +187,28 @@
     margin-top:8px;
   }
 
-  #tripView > .top-row.hero-card .countdown{
-    margin-top:92px;
+  #tripView > .top-row.hero-card .countdown-live{
+    width:100%;
+    margin-top:112px;
     padding-bottom:0;
   }
 
-  #tripView > .top-row.hero-card .countdown .num{
-    font-size:72px;
+  #tripView .countdown-grid{
+    grid-template-columns:1.15fr repeat(3,1fr);
+    gap:6px;
+  }
+
+  #tripView .countdown-unit{
+    padding:9px 7px 8px;
+    border-radius:12px;
+  }
+
+  #tripView .countdown-unit strong{
+    font-size:24px;
+  }
+
+  #tripView .countdown-days strong{
+    font-size:34px;
   }
 
   #tripView > .top-row.hero-card .live-weather.show{
@@ -151,7 +218,7 @@
 
 @media(max-width:390px){
   #tripView > .top-row.hero-card{
-    min-height:258px;
+    min-height:318px;
   }
 
   #tripView .hero-meta-dates{
@@ -162,7 +229,15 @@
     font-size:7.5px;
   }
 
-  #tripView > .top-row.hero-card .countdown .num{
-    font-size:66px;
+  #tripView .countdown-unit strong{
+    font-size:22px;
+  }
+
+  #tripView .countdown-days strong{
+    font-size:31px;
+  }
+
+  #tripView .countdown-unit span{
+    font-size:7px;
   }
 }
