@@ -1,4 +1,4 @@
-const CACHE_NAME = 'islanda2026-v13';
+const CACHE_NAME = 'islanda2026-v14';
 const RESTYLE_CSS = './visual-restyle.css';
 const RESTYLE_JS = './visual-restyle.js';
 const HERO_CSS = './hero-restyle.css';
@@ -8,6 +8,8 @@ const WEATHER_JS = './weather-live.js';
 const PREP_CSS = './prep-restyle.css';
 const NAV_CSS = './navigation-restyle.css';
 const NAV_JS = './navigation-restyle.js';
+const DASH_CSS = './home-dashboard.css';
+const DASH_JS = './home-dashboard.js';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -24,6 +26,8 @@ const CORE_ASSETS = [
   './prep-restyle.css',
   './navigation-restyle.css',
   './navigation-restyle.js',
+  './home-dashboard.css',
+  './home-dashboard.js',
 ];
 
 self.addEventListener('install', (event) => {
@@ -67,6 +71,9 @@ function injectRestyle(response) {
     if (!html.includes('navigation-restyle.css')) {
       html = html.replace('</head>', `  <link rel="stylesheet" href="${NAV_CSS}">\n</head>`);
     }
+    if (!html.includes('home-dashboard.css')) {
+      html = html.replace('</head>', `  <link rel="stylesheet" href="${DASH_CSS}">\n</head>`);
+    }
     if (!html.includes('visual-restyle.js')) {
       html = html.replace('</body>', `  <script src="${RESTYLE_JS}" defer></script>\n</body>`);
     }
@@ -78,6 +85,9 @@ function injectRestyle(response) {
     }
     if (!html.includes('navigation-restyle.js')) {
       html = html.replace('</body>', `  <script src="${NAV_JS}" defer></script>\n</body>`);
+    }
+    if (!html.includes('home-dashboard.js')) {
+      html = html.replace('</body>', `  <script src="${DASH_JS}" defer></script>\n</body>`);
     }
 
     const headers = new Headers(response.headers);
@@ -109,7 +119,9 @@ self.addEventListener('fetch', (event) => {
     url.pathname.endsWith('/weather-live.js') ||
     url.pathname.endsWith('/prep-restyle.css') ||
     url.pathname.endsWith('/navigation-restyle.css') ||
-    url.pathname.endsWith('/navigation-restyle.js')
+    url.pathname.endsWith('/navigation-restyle.js') ||
+    url.pathname.endsWith('/home-dashboard.css') ||
+    url.pathname.endsWith('/home-dashboard.js')
   );
 
   if (isNavigazione) {
