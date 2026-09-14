@@ -21,6 +21,56 @@
     {match:'consigli extra',view:'utility'}
   ];
 
+  const utilityOrder=[
+    'convertitore isk / eur',
+    'cosa e consigliato avere con te',
+    'la tua checklist personalizzabile',
+    'app utili per il viaggio',
+    'consigli extra'
+  ];
+  let reorderingUtility=false;
+
+  const utilityTitleFor=label=>[...trip.children].find(node=>
+    node.classList?.contains('section-title')&&normalize(node.textContent).includes(normalize(label))
+  );
+
+  const reorderUtilitySections=()=>{
+    if(reorderingUtility)return;
+    const titles=utilityOrder.map(utilityTitleFor);
+    if(titles.some(t=>!t))return;
+
+    const utilityTitlesInDom=[...trip.children].filter(node=>
+      node.classList?.contains('section-title')&&utilityOrder.some(label=>normalize(node.textContent).includes(normalize(label)))
+    );
+    const alreadyOrdered=utilityTitlesInDom.length===utilityOrder.length&&utilityOrder.every((label,i)=>
+      normalize(utilityTitlesInDom[i]?.textContent).includes(normalize(label))
+    );
+    if(alreadyOrdered)return;
+
+    reorderingUtility=true;
+    try{
+      const children=[...trip.children];
+      const first=titles.reduce((best,node)=>children.indexOf(node)<children.indexOf(best)?node:best,titles[0]);
+      const blocks=titles.map(title=>{
+        const nodes=[title];
+        let next=title.nextElementSibling;
+        while(next&&!next.classList?.contains('section-title')&&next.id!=='pushPanel'){
+          nodes.push(next);
+          next=next.nextElementSibling;
+        }
+        return nodes;
+      });
+      const marker=document.createComment('utility-order');
+      trip.insertBefore(marker,first);
+      const fragment=document.createDocumentFragment();
+      blocks.flat().forEach(node=>fragment.appendChild(node));
+      marker.after(fragment);
+      marker.remove();
+    }finally{
+      reorderingUtility=false;
+    }
+  };
+
   const tabs=[
     {id:'home',label:'Home',icon:'<path d="M3 10.8 12 3l9 7.8v9.2a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'},
     {id:'itinerario',label:'Itinerario',icon:'<path d="M6 3v4M18 3v4M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z"/><path d="M8 13h3M8 17h6"/>'},
@@ -108,6 +158,7 @@
   });
 
   const observer=new MutationObserver(()=>{
+    reorderUtilitySections();
     classify();
     [...trip.children].forEach(node=>{
       if(node.dataset.appView)node.classList.toggle('app-view-hidden',node.dataset.appView!==active);
@@ -120,6 +171,7 @@
   };
   new MutationObserver(syncVisibility).observe(trip,{attributes:true,attributeFilter:['class']});
 
+  reorderUtilitySections();
   classify();
   syncVisibility();
   history.replaceState({...(history.state||{}),[HISTORY_KEY]:active},'',location.href);
