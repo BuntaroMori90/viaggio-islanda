@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080c11">
+  <title>FlorinGo Travel App</title>
+  <link rel="stylesheet" href="commercial.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="commercial-auth.js" defer></script>
+  <script src="travel-data.js" defer></script>
+</head>
+<body>
+  <main class="commercial-shell">
+    <header class="brand-row">
+      <div class="brand-mark">
+        <div class="brand-dot" aria-hidden="true"></div>
+        <div class="brand-copy"><small>FLORINGO</small><strong>Travel App</strong></div>
+      </div>
+      <span class="kicker" style="margin:0">COMMERCIAL CORE · V0</span>
+    </header>
+
+    <section id="authView">
+      <div class="auth-layout">
+        <article class="auth-card">
+          <span class="kicker">IL TUO VIAGGIO, IN UN POSTO SOLO</span>
+          <h1>Accedi al tuo viaggio.</h1>
+          <p>Usa Google oppure ricevi un link via email. Dopo il primo accesso la sessione resta salvata sul dispositivo.</p>
+
+          <button id="googleLogin" class="google-btn" type="button"><span class="google-g">G</span>Continua con Google</button>
+          <div class="auth-divider">oppure</div>
+          <div class="email-row">
+            <input id="emailInput" type="email" inputmode="email" autocomplete="email" placeholder="nome@email.it" aria-label="Email">
+            <button id="emailLogin" type="button">Invia link</button>
+          </div>
+          <div id="authStatus">Controllo la sessione…</div>
+        </article>
+
+        <article class="marketing-card">
+          <span class="kicker">COME FUNZIONA</span>
+          <h2>Un account. Più viaggi.</h2>
+          <p>Ogni viaggio ha i propri partecipanti, dati, note, spese e contenuti. Nessun dato viene condiviso tra gruppi diversi.</p>
+          <div class="feature-list">
+            <div class="feature"><strong>Owner / Editor / Traveler</strong><span>Ruoli semplici e comprensibili per gestire il gruppo.</span></div>
+            <div class="feature"><strong>Invito con link o codice</strong><span>Il cliente invita i compagni senza creare account manualmente.</span></div>
+            <div class="feature"><strong>Isolamento per trip_id</strong><span>RLS Supabase separa ogni viaggio a livello database.</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="appView" class="hidden">
+      <header class="app-head">
+        <div class="user-chip">
+          <div class="avatar" id="userAvatar">--</div>
+          <div class="user-copy"><strong id="userName">Viaggiatore</strong><span id="userEmail"></span></div>
+        </div>
+        <button class="logout" id="logoutButton" type="button">Esci</button>
+      </header>
+
+      <div id="appNotice"></div>
+
+      <div class="dashboard-grid">
+        <article class="dashboard-card">
+          <span class="kicker">NUOVO VIAGGIO</span>
+          <h2>Crea uno spazio viaggio</h2>
+          <p>Il creatore diventa automaticamente Owner.</p>
+          <form id="createTripForm">
+            <div class="create-grid">
+              <input class="wide" id="tripTitle" placeholder="Titolo · Giappone 2027" required>
+              <input class="wide" id="tripDestination" placeholder="Destinazione · Giappone" required>
+              <input id="tripStart" type="date" aria-label="Data inizio">
+              <input id="tripEnd" type="date" aria-label="Data fine">
+            </div>
+            <button class="primary-btn" type="submit">Crea viaggio</button>
+          </form>
+        </article>
+
+        <article class="dashboard-card">
+          <span class="kicker">SEI STATO INVITATO?</span>
+          <h2>Entra in un viaggio</h2>
+          <p>Inserisci il codice ricevuto. Se hai aperto direttamente un link invito, questo passaggio avviene in automatico dopo il login.</p>
+          <form id="joinTripForm" class="join-row">
+            <input id="inviteCode" autocomplete="off" placeholder="CODICE INVITO" aria-label="Codice invito">
+            <button type="submit">Entra</button>
+          </form>
+        </article>
+      </div>
+
+      <div class="section-head"><div><small>I TUOI SPAZI</small><h2>Viaggi</h2></div></div>
+      <div id="tripsList"></div>
+      <section id="tripPreview" class="hidden"></section>
+    </section>
+  </main>
+
+  <div id="inviteModal" class="hidden"></div>
+</body>
+</html>
