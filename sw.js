@@ -1,4 +1,4 @@
-const CACHE_NAME = 'islanda2026-v18';
+const CACHE_NAME = 'islanda2026-v19';
 const RESTYLE_CSS = './visual-restyle.css';
 const RESTYLE_JS = './visual-restyle.js';
 const HERO_CSS = './hero-restyle.css';
@@ -16,6 +16,7 @@ const BUDGET_CSS = './budget-restyle.css';
 const BUDGET_JS = './budget-restyle.js';
 const ALTRO_CSS = './altro-restyle.css';
 const ALTRO_JS = './altro-restyle.js';
+const POLISH_CSS = './global-polish.css';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -40,6 +41,7 @@ const CORE_ASSETS = [
   './budget-restyle.js',
   './altro-restyle.css',
   './altro-restyle.js',
+  './global-polish.css',
 ];
 
 self.addEventListener('install', (event) => {
@@ -94,6 +96,9 @@ function injectRestyle(response) {
     }
     if (!html.includes('altro-restyle.css')) {
       html = html.replace('</head>', `  <link rel="stylesheet" href="${ALTRO_CSS}">\n</head>`);
+    }
+    if (!html.includes('global-polish.css')) {
+      html = html.replace('</head>', `  <link rel="stylesheet" href="${POLISH_CSS}">\n</head>`);
     }
     if (!html.includes('visual-restyle.js')) {
       html = html.replace('</body>', `  <script src="${RESTYLE_JS}" defer></script>\n</body>`);
@@ -157,7 +162,8 @@ self.addEventListener('fetch', (event) => {
     url.pathname.endsWith('/budget-restyle.css') ||
     url.pathname.endsWith('/budget-restyle.js') ||
     url.pathname.endsWith('/altro-restyle.css') ||
-    url.pathname.endsWith('/altro-restyle.js')
+    url.pathname.endsWith('/altro-restyle.js') ||
+    url.pathname.endsWith('/global-polish.css')
   );
 
   if (isNavigazione) {
