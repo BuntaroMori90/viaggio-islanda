@@ -1,8 +1,9 @@
-const CACHE_NAME = 'islanda2026-v9';
+const CACHE_NAME = 'islanda2026-v10';
 const RESTYLE_CSS = './visual-restyle.css';
 const RESTYLE_JS = './visual-restyle.js';
 const HERO_CSS = './hero-restyle.css';
 const HERO_JS = './hero-restyle.js';
+const METEO_CSS = './meteo-restyle.css';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -14,6 +15,7 @@ const CORE_ASSETS = [
   './visual-restyle.js',
   './hero-restyle.css',
   './hero-restyle.js',
+  './meteo-restyle.css',
 ];
 
 self.addEventListener('install', (event) => {
@@ -48,6 +50,9 @@ function injectRestyle(response) {
     if (!html.includes('hero-restyle.css')) {
       html = html.replace('</head>', `  <link rel="stylesheet" href="${HERO_CSS}">\n</head>`);
     }
+    if (!html.includes('meteo-restyle.css')) {
+      html = html.replace('</head>', `  <link rel="stylesheet" href="${METEO_CSS}">\n</head>`);
+    }
     if (!html.includes('visual-restyle.js')) {
       html = html.replace('</body>', `  <script src="${RESTYLE_JS}" defer></script>\n</body>`);
     }
@@ -79,7 +84,8 @@ self.addEventListener('fetch', (event) => {
     url.pathname.endsWith('/visual-restyle.css') ||
     url.pathname.endsWith('/visual-restyle.js') ||
     url.pathname.endsWith('/hero-restyle.css') ||
-    url.pathname.endsWith('/hero-restyle.js')
+    url.pathname.endsWith('/hero-restyle.js') ||
+    url.pathname.endsWith('/meteo-restyle.css')
   );
 
   if (isNavigazione) {
