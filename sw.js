@@ -1,5 +1,6 @@
 const CACHE_NAME = 'islanda2026-v7';
 const RESTYLE_CSS = './visual-restyle.css';
+const RESTYLE_JS = './visual-restyle.js';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -8,6 +9,7 @@ const CORE_ASSETS = [
   './icon-512.png',
   './push-notifications.js',
   './visual-restyle.css',
+  './visual-restyle.js',
 ];
 
 self.addEventListener('install', (event) => {
@@ -23,7 +25,7 @@ self.addEventListener('activate', (event) => {
     await Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)));
     await self.clients.claim();
 
-    // Un solo reload automatico quando entra in funzione questa nuova versione:
+    // Un solo reload automatico quando entra in funzione una nuova versione:
     // chi ha già installato la PWA riceve il restyling senza reinstallare nulla.
     const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     await Promise.all(clients.map(async (client) => {
@@ -41,6 +43,9 @@ function injectRestyle(response) {
     if (!html.includes('visual-restyle.css')) {
       html = html.replace('</head>', `  <link rel="stylesheet" href="${RESTYLE_CSS}">\n</head>`);
     }
+    if (!html.includes('visual-restyle.js')) {
+      html = html.replace('</body>', `  <script src="${RESTYLE_JS}" defer></script>\n</body>`);
+    }
 
     const headers = new Headers(response.headers);
     headers.delete('content-length');
@@ -56,10 +61,10 @@ function injectRestyle(response) {
 }
 
 // Strategia:
-// - HTML: network-first + iniezione del solo foglio grafico del restyling.
-// - manifest e push-notifications.js: network-first, come prima.
+// - HTML: network-first + iniezione degli asset puramente grafici del restyling.
+// - manifest, push-notifications.js e asset visuali: network-first.
 // - altri asset locali: cache-first con aggiornamento in background.
-// - logica, dati, Supabase, mappe e notifiche non vengono modificati.
+// - logica, dati, Supabase, mappe e notifiche restano separati dal restyling.
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
@@ -67,6 +72,7 @@ self.addEventListener('fetch', (event) => {
   const isNavigazione = req.mode === 'navigate' || (isSameOrigin && (url.pathname.endsWith('/') || url.pathname.endsWith('.html')));
   const isPushScript = isSameOrigin && url.pathname.endsWith('/push-notifications.js');
   const isManifest = isSameOrigin && url.pathname.endsWith('/manifest.json');
+  const isRestyleAsset = isSameOrigin && (url.pathname.endsWith('/visual-restyle.css') || url.pathname.endsWith('/visual-restyle.js'));
 
   if (isNavigazione) {
     event.respondWith((async () => {
@@ -81,7 +87,7 @@ self.addEventListener('fetch', (event) => {
         return cached ? injectRestyle(cached) : Response.error();
       }
     })());
-  } else if (isPushScript || isManifest) {
+  } else if (isPushScript || isManifest || isRestyleAsset) {
     event.respondWith(
       fetch(req).then((res) => {
         const resClone = res.clone();
