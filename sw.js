@@ -1,4 +1,4 @@
-const CACHE_NAME = 'islanda2026-v12';
+const CACHE_NAME = 'islanda2026-v13';
 const RESTYLE_CSS = './visual-restyle.css';
 const RESTYLE_JS = './visual-restyle.js';
 const HERO_CSS = './hero-restyle.css';
@@ -6,6 +6,8 @@ const HERO_JS = './hero-restyle.js';
 const METEO_CSS = './meteo-restyle.css';
 const WEATHER_JS = './weather-live.js';
 const PREP_CSS = './prep-restyle.css';
+const NAV_CSS = './navigation-restyle.css';
+const NAV_JS = './navigation-restyle.js';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -20,6 +22,8 @@ const CORE_ASSETS = [
   './meteo-restyle.css',
   './weather-live.js',
   './prep-restyle.css',
+  './navigation-restyle.css',
+  './navigation-restyle.js',
 ];
 
 self.addEventListener('install', (event) => {
@@ -60,6 +64,9 @@ function injectRestyle(response) {
     if (!html.includes('prep-restyle.css')) {
       html = html.replace('</head>', `  <link rel="stylesheet" href="${PREP_CSS}">\n</head>`);
     }
+    if (!html.includes('navigation-restyle.css')) {
+      html = html.replace('</head>', `  <link rel="stylesheet" href="${NAV_CSS}">\n</head>`);
+    }
     if (!html.includes('visual-restyle.js')) {
       html = html.replace('</body>', `  <script src="${RESTYLE_JS}" defer></script>\n</body>`);
     }
@@ -68,6 +75,9 @@ function injectRestyle(response) {
     }
     if (!html.includes('weather-live.js')) {
       html = html.replace('</body>', `  <script src="${WEATHER_JS}" defer></script>\n</body>`);
+    }
+    if (!html.includes('navigation-restyle.js')) {
+      html = html.replace('</body>', `  <script src="${NAV_JS}" defer></script>\n</body>`);
     }
 
     const headers = new Headers(response.headers);
@@ -97,7 +107,9 @@ self.addEventListener('fetch', (event) => {
     url.pathname.endsWith('/hero-restyle.js') ||
     url.pathname.endsWith('/meteo-restyle.css') ||
     url.pathname.endsWith('/weather-live.js') ||
-    url.pathname.endsWith('/prep-restyle.css')
+    url.pathname.endsWith('/prep-restyle.css') ||
+    url.pathname.endsWith('/navigation-restyle.css') ||
+    url.pathname.endsWith('/navigation-restyle.js')
   );
 
   if (isNavigazione) {
