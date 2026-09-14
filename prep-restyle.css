@@ -1,0 +1,252 @@
+/* Preparazione viaggio v1: App utili + checklist. Solo presentazione. */
+
+/* APP UTILI */
+#tripView .section-title + .panel:has(#appsContainer){
+  padding:14px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(61,220,151,.055),transparent 32%),
+    linear-gradient(180deg,rgba(255,255,255,.018),rgba(255,255,255,0)),
+    var(--surface-raised);
+}
+
+#tripView #appsContainer{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:9px !important;
+}
+
+#tripView #appsContainer > div{
+  position:relative;
+  min-width:0;
+  min-height:142px;
+  padding:42px 13px 13px !important;
+  border:1px solid rgba(255,255,255,.075) !important;
+  border-radius:17px !important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),
+    rgba(6,10,15,.58) !important;
+  box-shadow:0 10px 26px rgba(0,0,0,.10);
+}
+
+#tripView #appsContainer > div::before{
+  position:absolute;
+  top:12px;
+  left:12px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:30px;
+  height:22px;
+  padding:0 7px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:999px;
+  background:rgba(255,255,255,.025);
+  color:rgba(215,230,232,.52);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7.5px;
+  line-height:1;
+  letter-spacing:.08em;
+}
+
+#tripView #appsContainer > div:nth-child(1)::before{content:'SAFE';color:#72e1b2;}
+#tripView #appsContainer > div:nth-child(2)::before{content:'METEO';color:#78d8ea;}
+#tripView #appsContainer > div:nth-child(3)::before{content:'AURORA';color:#a99df0;}
+#tripView #appsContainer > div:nth-child(4)::before{content:'MAPPE';color:#ff9a69;}
+#tripView #appsContainer > div:nth-child(5)::before{content:'PARK';color:#f0c46f;}
+#tripView #appsContainer > div:nth-child(6)::before{content:'FUEL';color:#ff8d70;}
+
+#tripView #appsContainer > div > div:first-child{
+  margin-bottom:7px !important;
+  color:#f6fafb !important;
+  font-family:'Space Grotesk',sans-serif !important;
+  font-size:14px !important;
+  font-weight:700 !important;
+  line-height:1.2;
+  letter-spacing:-.02em;
+}
+
+#tripView #appsContainer > div > div:last-child{
+  color:rgba(215,230,232,.52) !important;
+  font-size:10.5px !important;
+  line-height:1.5 !important;
+}
+
+/* CHECKLIST COLLASSABILI già gestite dalla logica esistente */
+#tripView .panel.packing-collapsible{
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:19px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(255,90,31,.055),transparent 32%),
+    linear-gradient(180deg,rgba(255,255,255,.016),rgba(255,255,255,0)),
+    var(--surface-raised);
+  box-shadow:0 10px 28px rgba(0,0,0,.12);
+}
+
+#tripView .packing-toggle{
+  position:relative;
+  min-height:72px;
+  padding:15px 16px !important;
+  border-radius:19px;
+}
+
+#tripView .packing-toggle::before{
+  content:'✓';
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:34px;
+  height:34px;
+  margin-right:2px;
+  border:1px solid rgba(255,90,31,.20);
+  border-radius:12px;
+  background:rgba(255,90,31,.08);
+  color:#ff9868;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:16px;
+  font-weight:700;
+}
+
+#tripView .packing-toggle{
+  grid-template-columns:auto minmax(0,1fr) auto auto !important;
+}
+
+#tripView .packing-toggle > span:first-child{
+  min-width:0;
+}
+
+#tripView .packing-toggle-title{
+  color:#f6fafb;
+  font-size:13px;
+  font-weight:700;
+  line-height:1.25;
+}
+
+#tripView .packing-toggle-sub{
+  margin-top:4px;
+  color:rgba(215,230,232,.45);
+  font-size:9.5px;
+}
+
+#tripView .packing-count{
+  min-width:48px;
+  padding:6px 8px;
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:999px;
+  background:rgba(255,255,255,.025);
+  color:#ff9a69;
+  text-align:center;
+  font-size:9px;
+}
+
+#tripView .packing-arrow{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:28px;
+  height:28px;
+  border-radius:9px;
+  background:rgba(255,255,255,.025);
+}
+
+#tripView .packing-content{
+  padding:0 16px 16px !important;
+}
+
+#tripView .packing-content .checklist{
+  padding-top:4px;
+}
+
+#tripView .packing-content .checklist li{
+  min-height:50px;
+  padding:10px 0;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+#tripView .packing-content .checklist input[type='checkbox']{
+  width:19px;
+  height:19px;
+  accent-color:var(--brand);
+}
+
+#tripView .packing-content .checklist label{
+  color:rgba(247,250,251,.82);
+  font-size:11.5px;
+  line-height:1.45;
+}
+
+#tripView .packing-content .checklist li.done label{
+  color:rgba(215,230,232,.38);
+}
+
+#tripView .packing-content .checklist-progress{
+  margin-top:11px;
+  padding-top:10px;
+  border-top:1px solid rgba(255,255,255,.055);
+  color:rgba(215,230,232,.43);
+  font-size:9px;
+  letter-spacing:.04em;
+}
+
+#tripView .packing-content .qty-box button,
+#tripView .packing-content .del-btn{
+  border-color:rgba(255,255,255,.08);
+  background:rgba(255,255,255,.025);
+}
+
+/* Campo nuova voce: neutralizza inline styles senza cambiarne la logica */
+#tripView #newChecklistItem{
+  min-height:43px;
+  border:1px solid rgba(255,255,255,.08) !important;
+  border-radius:12px !important;
+  background:rgba(6,10,15,.55) !important;
+  color:#f6fafb !important;
+}
+
+#tripView #newChecklistItem + button{
+  min-width:43px;
+  min-height:43px;
+  padding:0 14px !important;
+  border-radius:12px !important;
+  background:linear-gradient(135deg,var(--brand),var(--brand-2)) !important;
+  color:white !important;
+  box-shadow:0 8px 20px rgba(255,90,31,.14);
+}
+
+@media(max-width:620px){
+  #tripView #appsContainer{
+    grid-template-columns:1fr !important;
+    gap:8px !important;
+  }
+
+  #tripView #appsContainer > div{
+    min-height:0;
+    padding:38px 13px 13px !important;
+  }
+
+  #tripView .packing-toggle{
+    padding:13px 13px !important;
+    grid-template-columns:auto minmax(0,1fr) auto auto !important;
+    gap:9px !important;
+  }
+
+  #tripView .packing-toggle::before{
+    width:32px;
+    height:32px;
+    border-radius:11px;
+  }
+
+  #tripView .packing-content{
+    padding:0 13px 13px !important;
+  }
+}
+
+@media(max-width:390px){
+  #tripView .packing-toggle{
+    grid-template-columns:auto minmax(0,1fr) auto !important;
+  }
+
+  #tripView .packing-count{
+    display:none;
+  }
+}
