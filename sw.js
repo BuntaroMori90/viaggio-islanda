@@ -1,4 +1,4 @@
-const CACHE_NAME = 'islanda2026-v30';
+const CACHE_NAME = 'islanda2026-v31';
 const RESTYLE_CSS = './visual-restyle.css';
 const RESTYLE_JS = './visual-restyle.js';
 const HERO_CSS = './hero-restyle.css';
@@ -14,6 +14,8 @@ const ITINERARY_CSS = './itinerary-restyle.css';
 const ITINERARY_JS = './itinerary-restyle.js';
 const BUDGET_CSS = './budget-restyle.css';
 const BUDGET_JS = './budget-restyle.js';
+const SITE_COSTS_CSS = './site-costs.css';
+const SITE_COSTS_JS = './site-costs.js';
 const ALTRO_CSS = './altro-restyle.css';
 const ALTRO_JS = './altro-restyle.js';
 const POLISH_CSS = './global-polish.css';
@@ -47,6 +49,8 @@ const CORE_ASSETS = [
   './itinerary-restyle.js',
   './budget-restyle.css',
   './budget-restyle.js',
+  './site-costs.css',
+  './site-costs.js',
   './altro-restyle.css',
   './altro-restyle.js',
   './global-polish.css',
@@ -86,6 +90,7 @@ function injectRestyle(response) {
     if (!html.includes('home-dashboard.css')) html = html.replace('</head>', `  <link rel="stylesheet" href="${DASH_CSS}">\n</head>`);
     if (!html.includes('itinerary-restyle.css')) html = html.replace('</head>', `  <link rel="stylesheet" href="${ITINERARY_CSS}">\n</head>`);
     if (!html.includes('budget-restyle.css')) html = html.replace('</head>', `  <link rel="stylesheet" href="${BUDGET_CSS}">\n</head>`);
+    if (!html.includes('site-costs.css')) html = html.replace('</head>', `  <link rel="stylesheet" href="${SITE_COSTS_CSS}">\n</head>`);
     if (!html.includes('altro-restyle.css')) html = html.replace('</head>', `  <link rel="stylesheet" href="${ALTRO_CSS}">\n</head>`);
     if (!html.includes('global-polish.css')) html = html.replace('</head>', `  <link rel="stylesheet" href="${POLISH_CSS}">\n</head>`);
     if (!html.includes('ops-live.css')) html = html.replace('</head>', `  <link rel="stylesheet" href="${OPS_CSS}">\n</head>`);
@@ -96,6 +101,7 @@ function injectRestyle(response) {
     if (!html.includes('home-dashboard.js')) html = html.replace('</body>', `  <script src="${DASH_JS}" defer></script>\n</body>`);
     if (!html.includes('itinerary-restyle.js')) html = html.replace('</body>', `  <script src="${ITINERARY_JS}" defer></script>\n</body>`);
     if (!html.includes('budget-restyle.js')) html = html.replace('</body>', `  <script src="${BUDGET_JS}" defer></script>\n</body>`);
+    if (!html.includes('site-costs.js')) html = html.replace('</body>', `  <script src="${SITE_COSTS_JS}" defer></script>\n</body>`);
     if (!html.includes('altro-restyle.js')) html = html.replace('</body>', `  <script src="${ALTRO_JS}" defer></script>\n</body>`);
     if (!html.includes('ops-live.js')) html = html.replace('</body>', `  <script src="${OPS_JS}" defer></script>\n</body>`);
     if (!html.includes('currency-live.js')) html = html.replace('</body>', `  <script src="${FX_JS}" defer></script>\n</body>`);
@@ -141,6 +147,8 @@ self.addEventListener('fetch', (event) => {
     url.pathname.endsWith('/itinerary-restyle.js') ||
     url.pathname.endsWith('/budget-restyle.css') ||
     url.pathname.endsWith('/budget-restyle.js') ||
+    url.pathname.endsWith('/site-costs.css') ||
+    url.pathname.endsWith('/site-costs.js') ||
     url.pathname.endsWith('/altro-restyle.css') ||
     url.pathname.endsWith('/altro-restyle.js') ||
     url.pathname.endsWith('/global-polish.css') ||
