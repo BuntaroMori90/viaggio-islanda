@@ -1,4 +1,4 @@
-const CACHE_NAME = 'islanda2026-v31';
+const CACHE_NAME = 'islanda2026-v32';
 const RESTYLE_CSS = './visual-restyle.css';
 const RESTYLE_JS = './visual-restyle.js';
 const HERO_CSS = './hero-restyle.css';
