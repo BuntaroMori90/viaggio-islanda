@@ -45,10 +45,7 @@
     {day:1,name:'Harpa Concert Hall',isk:0,perPerson:true,kind:'Ingresso',note:'Accesso all’edificio gratuito.'},
     {day:2,name:'Þingvellir National Park',isk:0,perPerson:true,kind:'Ingresso',note:'Ingresso al parco gratuito; si paga solo il parcheggio.'},
     {day:2,name:'Kerið',isk:700,perPerson:true,kind:'Ingresso',note:'Ingresso; parcheggio incluso.'},
-    {day:4,name:'Stokksnes / Vestrahorn',isk:1100,perPerson:true,kind:'Ingresso',note:'Accesso alla proprietà e parcheggi interni inclusi.'},
-    {day:5,name:'Forest Lagoon · Warm',isk:7490,perPerson:true,kind:'Ingresso',note:'Tariffa base adulto; asciugamano escluso.'},
-    {day:6,name:'Earth Lagoon · Essential',eur:55,perPerson:true,kind:'Ingresso',note:'Budget del vostro foglio. Il prezzo ufficiale è dinamico e parte da 7.900 ISK.'},
-    {day:8,name:'Blue Lagoon · Comfort',eur:87,perPerson:true,kind:'Ingresso',note:'Budget del vostro foglio. Il prezzo ufficiale è dinamico e parte da 11.990 ISK.'}
+    {day:4,name:'Stokksnes / Vestrahorn',isk:1100,perPerson:true,kind:'Ingresso',note:'Accesso alla proprietà e parcheggi interni inclusi.'}
   ];
 
   const optionalItems = [
@@ -106,7 +103,7 @@
         <button type="button" data-cost-tab="optional">Facoltativi · esclusi</button>
       </div>
       <div class="site-costs-detail" id="siteCostsDetail"></div>
-      <div class="site-costs-note">Il totale usa 1 auto da 6–9 posti e 6 adulti. Torre di Hallgrímskirkja, Museo Fallologico, Perlan e navetta Plane Wreck sono riportati solo come promemoria e non entrano in alcun totale. Le commissioni eventuali di Parka/EasyPark non sono incluse. Per Earth Lagoon e Blue Lagoon uso i valori del tuo foglio perché il prezzo finale dipende da slot/pacchetto.</div>`;
+      <div class="site-costs-note">Il totale usa 1 auto da 6–9 posti e 6 adulti. Forest Lagoon ed Earth Lagoon non compaiono qui perché già pagate; Blue Lagoon è esclusa perché non prevista. Torre di Hallgrímskirkja, Museo Fallologico, Perlan e navetta Plane Wreck sono riportati solo come promemoria e non entrano in alcun totale. Le commissioni eventuali di Parka/EasyPark non sono incluse.</div>`;
     costsPanel.parentElement.insertBefore(section,costsPanel.nextElementSibling);
     section.querySelectorAll('[data-cost-tab]').forEach(btn=>btn.addEventListener('click',()=>{
       section.querySelectorAll('[data-cost-tab]').forEach(x=>x.classList.toggle('is-active',x===btn));
