@@ -15,7 +15,7 @@
     {day:3,name:'Gljúfrabúi',isk:0,kind:'Parcheggio',pay:'stesso ticket',note:'Non spostare l’auto: usare Seljalandsfoss.'},
     {day:3,name:'Skógafoss',isk:1300,kind:'Parcheggio',pay:'Parka',note:'Tariffa ufficiale 2026 per veicolo 6–9 posti.'},
     {day:3,name:'Kvernufoss',isk:750,kind:'Parcheggio',pay:'Parka',note:'Trailhead presso Skógar Museum; WC museo inclusi negli orari di apertura.'},
-    {day:3,name:'Sólheimasandur Plane Wreck',isk:750,kind:'Parcheggio',pay:'Parka / sul posto',note:'Solo parcheggio; navetta conteggiata negli ingressi/attività.'},
+    {day:3,name:'Sólheimasandur Plane Wreck',isk:750,kind:'Parcheggio',pay:'Parka / sul posto',note:'Solo parcheggio; la navetta è facoltativa ed esclusa dal totale ingressi.'},
     {day:3,name:'Dyrhólaey · Lower + Upper',isk:1000,kind:'Parcheggio',pay:'Parka',note:'Categoria 6–9 posti. Un solo pagamento per i due parcheggi.'},
     {day:3,name:'Reynisfjara · P1 Lower',isk:1300,kind:'Parcheggio',pay:'Parka',note:'Categoria 6–9 posti; P1 scelto per rapidità e servizi.'},
     {day:4,name:'Fjaðrárgljúfur',isk:1300,kind:'Parcheggio',pay:'Parka',note:'Categoria 6–9 posti; parcheggio principale.'},
@@ -42,17 +42,20 @@
   ];
 
   const entryItems = [
-    {day:1,name:'Hallgrímskirkja · torre',isk:1500,perPerson:true,kind:'Ingresso',note:'Chiesa gratuita; biglietto torre adulto.'},
     {day:1,name:'Harpa Concert Hall',isk:0,perPerson:true,kind:'Ingresso',note:'Accesso all’edificio gratuito.'},
-    {day:1,name:'Museo Fallologico',isk:3900,perPerson:true,kind:'Ingresso',note:'Tariffa adulto corrente.'},
-    {day:1,name:'Perlan',eur:48,perPerson:true,kind:'Ingresso',note:'Valore budget del vostro foglio; prezzo finale dipende dal biglietto selezionato.'},
     {day:2,name:'Þingvellir National Park',isk:0,perPerson:true,kind:'Ingresso',note:'Ingresso al parco gratuito; si paga solo il parcheggio.'},
     {day:2,name:'Kerið',isk:700,perPerson:true,kind:'Ingresso',note:'Ingresso; parcheggio incluso.'},
-    {day:3,name:'Plane Wreck · navetta',isk:3200,perPerson:true,kind:'Attività',note:'Navetta A/R; il parcheggio è conteggiato separatamente.'},
     {day:4,name:'Stokksnes / Vestrahorn',isk:1100,perPerson:true,kind:'Ingresso',note:'Accesso alla proprietà e parcheggi interni inclusi.'},
     {day:5,name:'Forest Lagoon · Warm',isk:7490,perPerson:true,kind:'Ingresso',note:'Tariffa base adulto; asciugamano escluso.'},
     {day:6,name:'Earth Lagoon · Essential',eur:55,perPerson:true,kind:'Ingresso',note:'Budget del vostro foglio. Il prezzo ufficiale è dinamico e parte da 7.900 ISK.'},
     {day:8,name:'Blue Lagoon · Comfort',eur:87,perPerson:true,kind:'Ingresso',note:'Budget del vostro foglio. Il prezzo ufficiale è dinamico e parte da 11.990 ISK.'}
+  ];
+
+  const optionalItems = [
+    {day:1,name:'Hallgrímskirkja · torre',eur:10.45,perPerson:true,kind:'Facoltativo',note:'Da decidere sul posto. Escluso completamente dal totale.'},
+    {day:1,name:'Museo Fallologico',eur:24,perPerson:true,kind:'Facoltativo',note:'Da decidere sul posto. Escluso completamente dal totale.'},
+    {day:1,name:'Perlan',eur:48,perPerson:true,kind:'Facoltativo',note:'Da decidere sul posto. Escluso completamente dal totale.'},
+    {day:3,name:'Plane Wreck · navetta',eur:20,perPerson:true,kind:'Facoltativo',note:'Da valutare in base a tempo e meteo. Escluso completamente dal totale.'}
   ];
 
   const fmtEUR = n => new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
@@ -99,10 +102,11 @@
       <div class="site-costs-meta" id="siteCostsMeta"></div>
       <div class="site-costs-tabs" role="tablist" aria-label="Dettaglio costi sul posto">
         <button type="button" class="is-active" data-cost-tab="parking">Parcheggi + pedaggi</button>
-        <button type="button" data-cost-tab="entries">Ingressi</button>
+        <button type="button" data-cost-tab="entries">Ingressi inclusi</button>
+        <button type="button" data-cost-tab="optional">Facoltativi · esclusi</button>
       </div>
       <div class="site-costs-detail" id="siteCostsDetail"></div>
-      <div class="site-costs-note">Il totale usa 1 auto da 6–9 posti e 6 adulti. Le commissioni eventuali di Parka/EasyPark non sono incluse. Per Earth Lagoon, Blue Lagoon e Perlan uso i valori del tuo foglio perché il prezzo finale dipende da slot/pacchetto. Il totale non viene sommato automaticamente alla voce “Attività” del budget generale per evitare doppi conteggi.</div>`;
+      <div class="site-costs-note">Il totale usa 1 auto da 6–9 posti e 6 adulti. Torre di Hallgrímskirkja, Museo Fallologico, Perlan e navetta Plane Wreck sono riportati solo come promemoria e non entrano in alcun totale. Le commissioni eventuali di Parka/EasyPark non sono incluse. Per Earth Lagoon e Blue Lagoon uso i valori del tuo foglio perché il prezzo finale dipende da slot/pacchetto.</div>`;
     costsPanel.parentElement.insertBefore(section,costsPanel.nextElementSibling);
     section.querySelectorAll('[data-cost-tab]').forEach(btn=>btn.addEventListener('click',()=>{
       section.querySelectorAll('[data-cost-tab]').forEach(x=>x.classList.toggle('is-active',x===btn));
@@ -123,15 +127,16 @@
     const max=totals(fx.rate,true);
     const pIsk=totalsISK(parkingItems,false);
     const eIsk=totalsISK(entryItems,false);
+    const entriesEur=entryItems.reduce((s,x)=>s+(x.eur||0)*(x.perPerson?PEOPLE:1),0);
     const summary=document.getElementById('siteCostsSummary');
     const parkingRange=Math.abs(max.parking-base.parking)>.01 ? `${fmtEUR(base.parking)}–${fmtEUR(max.parking)}` : fmtEUR(base.parking);
     summary.innerHTML=
       summaryCard('PARCHEGGI + PEDAGGI',parkingRange,`${fmtISK(pIsk)} + €12,50 · gruppo`,'parking')+
-      summaryCard('INGRESSI / ATTIVITÀ',fmtEUR(base.entries),`${fmtISK(eIsk)} + €1.140,00 · gruppo`,'entries')+
+      summaryCard('INGRESSI INCLUSI',fmtEUR(base.entries),`${fmtISK(eIsk)} + ${fmtEUR(entriesEur)} · gruppo`,'entries')+
       summaryCard('TOTALE SUL POSTO',Math.abs(max.total-base.total)>.01?`${fmtEUR(base.total)}–${fmtEUR(max.total)}`:fmtEUR(base.total),Math.abs(max.total-base.total)>.01?`${fmtEUR(base.total/PEOPLE)}–${fmtEUR(max.total/PEOPLE)} a persona`:`${fmtEUR(base.total/PEOPLE)} a persona`,'total');
 
     const meta=document.getElementById('siteCostsMeta');
-    meta.innerHTML=`<span>Cambio: <b>1 EUR ≈ ${(1/fx.rate).toFixed(1)} ISK</b>${fx.live&&fx.date?` · ${fx.date}`:' · fallback offline'}</span><span>Veicolo: <b>6–9 posti</b></span><span>Persone: <b>${PEOPLE}</b></span>`;
+    meta.innerHTML=`<span>Cambio: <b>1 EUR ≈ ${(1/fx.rate).toFixed(1)} ISK</b>${fx.live&&fx.date?` · ${fx.date}`:' · fallback offline'}</span><span>Veicolo: <b>6–9 posti</b></span><span>Persone: <b>${PEOPLE}</b></span><span>Facoltativi: <b>esclusi dal totale</b></span>`;
     patchMacroBudget(base.parking/PEOPLE);
   }
 
@@ -154,7 +159,7 @@
     const detail=document.getElementById('siteCostsDetail');
     if(!detail)return;
     const fx=currentRate();
-    const items=tab==='entries'?entryItems:parkingItems;
+    const items=tab==='entries'?entryItems:tab==='optional'?optionalItems:parkingItems;
     const grouped=groupByDay(items);
     detail.innerHTML=Object.entries(grouped).map(([day,rows])=>{
       const body=rows.map(item=>{
