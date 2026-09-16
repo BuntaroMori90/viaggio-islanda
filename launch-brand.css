@@ -1,0 +1,35 @@
+/* Shared identity for the launch screen and the existing access form. */
+#appLaunch {
+  position:fixed; inset:0; z-index:10000; flex-direction:column;
+  align-items:center; justify-content:center; padding:32px;
+  background:radial-gradient(ellipse at 50% 34%,#10364a 0%,#071426 62%);
+  color:#eaf7ff; text-align:center; font-family:system-ui,sans-serif;
+}
+#appLaunch img { width:144px; height:144px; border-radius:32px; margin-bottom:26px; }
+#appLaunch strong { font-size:30px; letter-spacing:-.04em; font-weight:650; }
+#appLaunch strong span { color:#7fe4d0; font-weight:400; }
+#appLaunch p { margin:10px 0 26px; color:#adc2d0; font-size:14px; }
+#appLaunch .launch-spinner { width:23px; height:23px; border:2px solid #284859; border-top-color:#7fe4d0; border-radius:50%; animation:launch-spin 1s linear infinite; }
+@keyframes launch-spin { to { transform:rotate(360deg); } }
+html body #gateView {
+  min-height:100svh; padding:32px 20px;
+  background:radial-gradient(ellipse at 50% 20%,rgba(30,128,137,.17),transparent 60%);
+}
+html body #gateView .card {
+  max-width:420px; text-align:center; padding:36px 30px;
+  border:1px solid rgba(143,214,225,.16); border-radius:28px;
+  background:linear-gradient(155deg,#102336,#091624);
+  box-shadow:0 24px 80px rgba(0,0,0,.3);
+}
+html body #gateView .gate-app-icon { display:block; width:128px; height:128px; margin:0 auto 24px; border-radius:28px; }
+html body #gateView .eyebrow { color:#8ee4d2; font-size:10px; letter-spacing:.16em; margin-bottom:12px; }
+html body #gateView h1 { font-size:36px; letter-spacing:-.04em; line-height:1.15; margin-bottom:14px; background:none; -webkit-text-fill-color:#eff8ff; color:#eff8ff; }
+html body #gateView .sub { color:#adc2d0; font-size:14px; line-height:1.7; margin:0 auto 28px; max-width:290px; }
+html body #gateView .gate { text-align:left; }
+html body #gateView label { display:block; margin-bottom:8px; color:#d7e6e8; font-size:13px; }
+html body #gateView .gate input { background:#071426; border:1px solid #365265; border-radius:12px; color:#eff8ff; }
+html body #gateView .gate input:focus-visible { outline:2px solid #8ee4d2; outline-offset:3px; }
+html body #gateView .gate button { border-radius:12px; background:linear-gradient(110deg,#83e9c4,#6acfe8); color:#071426; }
+html body #gateView .gate button:focus-visible { outline:2px solid #8ee4d2; outline-offset:3px; }
+@media(max-width:360px) { html body #gateView .card { padding:28px 22px; } }
+@media(prefers-reduced-motion:reduce) { #appLaunch .launch-spinner { animation:none; } }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'islanda2026-v29';
+const CACHE_NAME = 'islanda2026-v30';
 const RESTYLE_CSS = './visual-restyle.css';
 const RESTYLE_JS = './visual-restyle.js';
 const HERO_CSS = './hero-restyle.css';
@@ -26,6 +26,10 @@ const CORE_ASSETS = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
+  './icon-aurora-192.png',
+  './icon-aurora-512.png',
+  './icon-aurora-maskable-512.png',
+  './launch-brand.css',
   './push-notifications.js',
   './pwa-install.js',
   './visual-restyle.css',
