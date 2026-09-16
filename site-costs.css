@@ -1,0 +1,43 @@
+/* Costi sul posto: parcheggi, pedaggi e ingressi verificati per Islanda 2026. */
+#siteCostsSection{margin-top:18px;}
+.site-costs-title{margin-top:28px!important;}
+.site-costs-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:10px;}
+.site-cost-card{min-width:0;padding:14px;border:1px solid rgba(255,255,255,.07);border-radius:16px;background:rgba(7,12,18,.52);}
+.site-cost-card span{display:block;color:rgba(215,230,232,.43);font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;}
+.site-cost-card strong{display:block;margin-top:7px;color:#f7fafb;font-size:19px;line-height:1.05;letter-spacing:-.035em;}
+.site-cost-card small{display:block;margin-top:7px;color:rgba(215,230,232,.46);font-size:9px;line-height:1.35;}
+.site-cost-card.parking{background:linear-gradient(145deg,rgba(79,211,232,.07),transparent 60%),rgba(7,12,18,.52);}
+.site-cost-card.entries{background:linear-gradient(145deg,rgba(124,111,224,.08),transparent 60%),rgba(7,12,18,.52);}
+.site-cost-card.total{border-color:rgba(255,90,31,.16);background:linear-gradient(145deg,rgba(255,90,31,.10),transparent 60%),rgba(7,12,18,.52);}
+.site-cost-card.total strong{color:#ff9565;}
+.site-costs-meta{display:flex;flex-wrap:wrap;gap:7px 14px;padding:0 2px 11px;color:rgba(215,230,232,.43);font-size:9px;}
+.site-costs-meta b{color:rgba(215,230,232,.72);font-weight:500;}
+.site-costs-tabs{display:flex;gap:7px;margin:2px 0 9px;}
+.site-costs-tabs button{appearance:none;border:1px solid rgba(255,255,255,.07);border-radius:999px;background:rgba(7,12,18,.52);color:rgba(215,230,232,.55);padding:8px 12px;font-family:'Space Grotesk',sans-serif;font-size:10px;cursor:pointer;}
+.site-costs-tabs button.is-active{border-color:rgba(79,211,232,.28);background:rgba(79,211,232,.08);color:#d7e6e8;}
+.site-cost-day{margin-bottom:7px;border:1px solid rgba(255,255,255,.06);border-radius:13px;overflow:hidden;background:rgba(7,12,18,.38);}
+.site-cost-day-head{width:100%;display:flex;align-items:center;gap:9px;padding:10px 12px;border:0;background:transparent;color:#d7e6e8;text-align:left;cursor:pointer;}
+.site-cost-day-head span{min-width:28px;color:#4fd3e8;font-family:'JetBrains Mono',monospace;font-size:9px;}
+.site-cost-day-head b{flex:1;font-size:11px;font-weight:500;}
+.site-cost-day-head i{font-style:normal;color:rgba(215,230,232,.38);transition:transform .18s ease;}
+.site-cost-day.is-open .site-cost-day-head i{transform:rotate(180deg);}
+.site-cost-day-body{display:none;border-top:1px solid rgba(255,255,255,.05);}
+.site-cost-day.is-open .site-cost-day-body{display:block;}
+.site-cost-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;padding:11px 12px;border-bottom:1px solid rgba(255,255,255,.045);}
+.site-cost-row:last-child{border-bottom:0;}
+.site-cost-main{min-width:0;}
+.site-cost-kind{display:block;margin-bottom:3px;color:rgba(79,211,232,.48);font-family:'JetBrains Mono',monospace;font-size:7px;text-transform:uppercase;letter-spacing:.08em;}
+.site-cost-main b{display:block;color:#f7fafb;font-size:11px;font-weight:500;line-height:1.25;}
+.site-cost-main small{display:block;margin-top:4px;color:rgba(215,230,232,.43);font-size:9px;line-height:1.4;}
+.site-cost-price{min-width:114px;text-align:right;}
+.site-cost-price strong{display:block;color:#ff9565;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;}
+.site-cost-price span{display:block;margin-top:3px;color:rgba(215,230,232,.58);font-size:9px;}
+.site-cost-price em{display:block;margin-top:4px;color:rgba(215,230,232,.32);font-size:8px;font-style:normal;}
+.site-costs-note{margin-top:10px;padding:10px 12px;border-left:2px solid rgba(255,90,31,.5);border-radius:6px;background:rgba(255,90,31,.035);color:rgba(215,230,232,.45);font-size:9px;line-height:1.5;}
+@media(max-width:620px){
+  .site-costs-summary{grid-template-columns:1fr 1fr;}
+  .site-cost-card.total{grid-column:1/-1;}
+  .site-cost-row{grid-template-columns:1fr;gap:8px;}
+  .site-cost-price{text-align:left;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;}
+  .site-cost-price strong,.site-cost-price span,.site-cost-price em{margin:0;}
+}
