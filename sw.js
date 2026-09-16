@@ -1,4 +1,4 @@
-const CACHE_NAME = 'islanda2026-v33';
+const CACHE_NAME = 'islanda2026-v34';
 const RESTYLE_CSS = './visual-restyle.css';
 const RESTYLE_JS = './visual-restyle.js';
 const HERO_CSS = './hero-restyle.css';
@@ -16,6 +16,7 @@ const BUDGET_CSS = './budget-restyle.css';
 const BUDGET_JS = './budget-restyle.js';
 const SITE_COSTS_CSS = './site-costs.css';
 const SITE_COSTS_JS = './site-costs.js';
+const PARKING_MAPS_JS = './parking-maps.js';
 const ALTRO_CSS = './altro-restyle.css';
 const ALTRO_JS = './altro-restyle.js';
 const POLISH_CSS = './global-polish.css';
@@ -51,6 +52,7 @@ const CORE_ASSETS = [
   './budget-restyle.js',
   './site-costs.css',
   './site-costs.js',
+  './parking-maps.js',
   './altro-restyle.css',
   './altro-restyle.js',
   './global-polish.css',
@@ -102,6 +104,7 @@ function injectRestyle(response) {
     if (!html.includes('itinerary-restyle.js')) html = html.replace('</body>', `  <script src="${ITINERARY_JS}" defer></script>\n</body>`);
     if (!html.includes('budget-restyle.js')) html = html.replace('</body>', `  <script src="${BUDGET_JS}" defer></script>\n</body>`);
     if (!html.includes('site-costs.js')) html = html.replace('</body>', `  <script src="${SITE_COSTS_JS}" defer></script>\n</body>`);
+    if (!html.includes('parking-maps.js')) html = html.replace('</body>', `  <script src="${PARKING_MAPS_JS}" defer></script>\n</body>`);
     if (!html.includes('altro-restyle.js')) html = html.replace('</body>', `  <script src="${ALTRO_JS}" defer></script>\n</body>`);
     if (!html.includes('ops-live.js')) html = html.replace('</body>', `  <script src="${OPS_JS}" defer></script>\n</body>`);
     if (!html.includes('currency-live.js')) html = html.replace('</body>', `  <script src="${FX_JS}" defer></script>\n</body>`);
@@ -149,6 +152,7 @@ self.addEventListener('fetch', (event) => {
     url.pathname.endsWith('/budget-restyle.js') ||
     url.pathname.endsWith('/site-costs.css') ||
     url.pathname.endsWith('/site-costs.js') ||
+    url.pathname.endsWith('/parking-maps.js') ||
     url.pathname.endsWith('/altro-restyle.css') ||
     url.pathname.endsWith('/altro-restyle.js') ||
     url.pathname.endsWith('/global-polish.css') ||
