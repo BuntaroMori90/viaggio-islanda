@@ -1,5 +1,5 @@
 (()=>{
-  const DEPARTURE = new Date('2026-09-29T21:00:00+02:00').getTime();
+  const DEPARTURE = new Date('2026-09-29T18:00:00+02:00').getTime();
   let timer=null;
 
   const pad=n=>String(n).padStart(2,'0');
@@ -10,8 +10,8 @@
     countdown.dataset.liveCountdown='1';
     countdown.classList.add('countdown-live');
     countdown.innerHTML=`
-      <div class="countdown-kicker">PARTENZA TRA</div>
-      <div class="countdown-grid" aria-label="Conto alla rovescia alla partenza">
+      <div class="countdown-kicker">SI PARTE DA CASA TRA</div>
+      <div class="countdown-grid" aria-label="Conto alla rovescia alla partenza da casa, 29 settembre alle 18:00 italiane">
         <div class="countdown-unit countdown-days"><strong id="daysLeft">--</strong><span>Giorni</span></div>
         <div class="countdown-unit"><strong id="hoursLeft">--</strong><span>Ore</span></div>
         <div class="countdown-unit"><strong id="minutesLeft">--</strong><span>Min</span></div>
@@ -67,7 +67,7 @@
         meta.className='hero-meta';
         meta.innerHTML=`
           <div class="hero-meta-kicker">ROAD TRIP · ISLANDA</div>
-          <div class="hero-meta-dates"><span>30 SET</span><i>→</i><span>8 OTT 2026</span></div>
+          <div class="hero-meta-dates"><span>29 SET</span><i>→</i><span>8 OTT 2026</span></div>
           <div class="hero-meta-facts"><span>${stages}</span><span>${people}</span></div>`;
         top.prepend(meta);
       }

@@ -243,6 +243,18 @@
     .schedule{ font-size:12px; }
   }
 </style>
+<link rel="stylesheet" href="visual-restyle.css">
+<link rel="stylesheet" href="hero-restyle.css">
+<link rel="stylesheet" href="meteo-restyle.css">
+<link rel="stylesheet" href="prep-restyle.css">
+<link rel="stylesheet" href="navigation-restyle.css">
+<link rel="stylesheet" href="home-dashboard.css">
+<link rel="stylesheet" href="itinerary-restyle.css">
+<link rel="stylesheet" href="budget-restyle.css">
+<link rel="stylesheet" href="site-costs.css">
+<link rel="stylesheet" href="altro-restyle.css">
+<link rel="stylesheet" href="global-polish.css">
+<link rel="stylesheet" href="ops-live.css">
 </head>
 <body>
 <div id="appLaunch" role="status" aria-live="polite" aria-label="Caricamento di Islanda 2026">
@@ -255,7 +267,7 @@
 
 <div class="aurora"></div>
 
-<div id="gateView">
+<div id="gateView" role="main">
   <div class="card">
     <img class="gate-app-icon" src="icon-aurora-512.png" alt="Montagna islandese sotto l’aurora boreale" width="128" height="128">
     <div class="eyebrow">Il viaggio comincia qui</div>
@@ -270,7 +282,7 @@
   </div>
 </div>
 
-<div id="tripView" class="hidden">
+<div id="tripView" class="hidden" role="main">
   <div class="eyebrow">Islanda 2026</div>
   <div class="welcome" id="welcomeMsg"></div>
   <h1>On the road</h1>
@@ -278,7 +290,7 @@
   <div class="top-row">
     <div class="countdown">
       <div class="num" id="daysLeft">--</div>
-      <div class="lbl">giorni alla partenza</div>
+      <div class="lbl">giorni alla partenza da casa</div>
     </div>
     <div class="live-weather" id="liveWeather">
       <div class="dot"></div>
@@ -339,8 +351,8 @@
     <div class="exp-form">
       <input type="text" id="expDesc" placeholder="Descrizione">
       <input type="number" id="expAmount" placeholder="€" min="0" step="0.01">
-      <select id="expPaidBy"></select>
-      <button onclick="aggiungiSpesa()">+</button>
+      <select id="expPaidBy" aria-label="Spesa pagata da"></select>
+      <button onclick="aggiungiSpesa()" aria-label="Aggiungi spesa">+</button>
     </div>
   </div>
 
@@ -870,7 +882,7 @@ document.getElementById('iskInput').addEventListener('input', function() {
     }
 
     const oggi = new Date();
-    const diffMs = dataPartenza - oggi;
+    const diffMs = new Date('2026-09-29T18:00:00+02:00') - oggi;
     const giorniRimasti = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
     document.getElementById('daysLeft').textContent = giorniRimasti;
 
@@ -1057,5 +1069,17 @@ document.getElementById('iskInput').addEventListener('input', function() {
   }
 </script>
 
+<script src="visual-restyle.js" defer></script>
+<script src="hero-restyle.js" defer></script>
+<script src="weather-live.js" defer></script>
+<script src="navigation-restyle.js" defer></script>
+<script src="home-dashboard.js" defer></script>
+<script src="itinerary-restyle.js" defer></script>
+<script src="budget-restyle.js" defer></script>
+<script src="site-costs.js" defer></script>
+<script src="parking-maps.js" defer></script>
+<script src="altro-restyle.js" defer></script>
+<script src="ops-live.js" defer></script>
+<script src="currency-live.js" defer></script>
 </body>
 </html>
