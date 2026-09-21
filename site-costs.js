@@ -97,16 +97,16 @@
       <div class="section-title site-costs-title">Parcheggi, pedaggi e ingressi</div>
       <div class="site-costs-summary" id="siteCostsSummary"></div>
       <div class="site-costs-meta" id="siteCostsMeta"></div>
-      <div class="site-costs-tabs" role="tablist" aria-label="Dettaglio costi sul posto">
-        <button type="button" class="is-active" data-cost-tab="parking">Parcheggi + pedaggi</button>
-        <button type="button" data-cost-tab="entries">Ingressi inclusi</button>
-        <button type="button" data-cost-tab="optional">Facoltativi · esclusi</button>
+      <div class="site-costs-tabs" role="group" aria-label="Dettaglio costi sul posto">
+        <button type="button" class="is-active" aria-pressed="true" data-cost-tab="parking">Parcheggi + pedaggi</button>
+        <button type="button" aria-pressed="false" data-cost-tab="entries">Ingressi inclusi</button>
+        <button type="button" aria-pressed="false" data-cost-tab="optional">Facoltativi · esclusi</button>
       </div>
       <div class="site-costs-detail" id="siteCostsDetail"></div>
       <div class="site-costs-note">Il totale usa 1 auto da 6–9 posti e 6 adulti. Forest Lagoon ed Earth Lagoon non compaiono qui perché già pagate; Blue Lagoon è esclusa perché non prevista. Torre di Hallgrímskirkja, Museo Fallologico, Perlan e navetta Plane Wreck sono riportati solo come promemoria e non entrano in alcun totale. Le commissioni eventuali di Parka/EasyPark non sono incluse.</div>`;
     costsPanel.parentElement.insertBefore(section,costsPanel.nextElementSibling);
     section.querySelectorAll('[data-cost-tab]').forEach(btn=>btn.addEventListener('click',()=>{
-      section.querySelectorAll('[data-cost-tab]').forEach(x=>x.classList.toggle('is-active',x===btn));
+      section.querySelectorAll('[data-cost-tab]').forEach(x=>{x.classList.toggle('is-active',x===btn);x.setAttribute('aria-pressed',String(x===btn));});
       renderDetail(btn.dataset.costTab);
     }));
     return section;
