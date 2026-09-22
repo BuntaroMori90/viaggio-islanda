@@ -90,7 +90,7 @@
   const classify=()=>{
     let current='home';
     [...trip.children].forEach(node=>{
-      if(node.id==='appBottomNav')return;
+      if(node.id==='appBottomNav'||node.id==='appViewHeading')return;
       if(node.classList?.contains('section-title')){
         const text=normalize(node.textContent);
         const found=sectionMap.find(x=>text.includes(normalize(x.match)));
@@ -113,8 +113,14 @@
   };
 
   const nav=makeNav();
+  const viewHeading=document.createElement('h1');
+  viewHeading.id='appViewHeading';
+  viewHeading.className='sr-only';
+  trip.prepend(viewHeading);
 
   const updateNavState=()=>{
+    viewHeading.textContent=tabs.find(t=>t.id===active)?.label||'Home';
+    viewHeading.hidden=active==='home';
     nav.querySelectorAll('.app-tab').forEach(btn=>{
       const on=btn.dataset.tab===active;
       btn.classList.toggle('is-active',on);

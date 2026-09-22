@@ -29,7 +29,7 @@
     return total?.valore||'€ 1.774';
   };
 
-  const groupExpenseTotal=()=>[...expenses.querySelectorAll('.exp-row .v')].reduce((sum,el)=>sum+parseEuro(el.textContent),0);
+  const groupExpenseTotal=()=>[...expenses.querySelectorAll('.exp-row')].reduce((cents,row)=>{const amount=Number(row.dataset.amount);return cents+(Number.isFinite(amount)?Math.round(amount*100):0);},0)/100;
   const peopleCount=()=>{
     try{if(typeof partecipanti!=='undefined'&&Array.isArray(partecipanti)&&partecipanti.length)return partecipanti.length;}catch(_){}
     return 6;
@@ -49,7 +49,7 @@
       <div class="budget-hero">
         <span class="budget-kicker">BUDGET NOTO · A PERSONA</span>
         <strong id="budgetKnownTotal">€ 1.774</strong>
-        <small>Spese note confermate · pasti esclusi</small>
+        <small>Stima aggiornata · quote a persona</small>
       </div>
       <div class="budget-stat">
         <span class="budget-stat-label">SPESE GRUPPO</span>
