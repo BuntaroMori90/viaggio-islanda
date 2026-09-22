@@ -55,12 +55,17 @@
     if(summary.innerHTML!==html)summary.innerHTML=html;
   };
 
-  const setActiveTab=n=>{
+  const setActiveTab=(n,{reveal=false}={})=>{
     document.querySelectorAll('#itineraryDayTabs .itinerary-day-tab').forEach(btn=>{
       const active=+btn.dataset.day===n;
       btn.classList.toggle('is-active',active);
       btn.setAttribute('aria-current',active?'true':'false');
-      if(active)btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+      // Only move the horizontal day strip after an explicit day selection.
+      // scrollIntoView also scrolls the page when a nested accordion changes.
+      if(active&&reveal){
+        const nav=btn.parentElement;
+        nav.scrollTo({left:btn.offsetLeft-nav.offsetLeft-(nav.clientWidth-btn.offsetWidth)/2,behavior:'smooth'});
+      }
     });
   };
 
@@ -74,7 +79,7 @@
       if(head)head.click();
       else target.classList.add('open');
     }
-    setActiveTab(getNum(target)||n);
+    setActiveTab(getNum(target)||n,{reveal:true});
     if(scroll)setTimeout(()=>target.scrollIntoView({behavior:'smooth',block:'start'}),35);
   };
 
