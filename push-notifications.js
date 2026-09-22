@@ -42,11 +42,11 @@ const roadCosts={
 4:[
 {k:"PARCHEGGIO",n:"Fjaðrárgljúfur",p:"~1.300 ISK / auto",m:"Parka",d:"Stima categoria 6–9 posti; verificare il prezzo esposto."},
 {k:"PARCHEGGIO",n:"Jökulsárlón",p:"1.440 ISK / auto",m:"Parco / pagamento targa",d:"Categoria 6–9 posti · tariffa regionale valida fino a mezzanotte.",u:"https://www.vatnajokulsthjodgardur.is/en/communities--businesses/pricelist"},
-{k:"PEDAGGIO",n:"Hornafjörður ×2",p:"1.500 ISK / passaggio",m:"Spölur · entro 12 h",d:"Due passaggi previsti nel G4: circa 3.000 ISK totali. Auto a noleggio: pagare direttamente entro 12 ore per evitare addebito del rental.",u:"https://www.spolur.is/en/faq"},
+{k:"PEDAGGIO",n:"Hornafjörður ×1",p:"1.500 ISK / passaggio",m:"Spölur · entro 12 h",d:"Un passaggio previsto verso Stokksnes: 1.500 ISK totali. Per Hoffell usare il ramo orientale della 987. Auto a noleggio: pagare direttamente entro 12 ore per evitare addebito del rental.",u:"https://www.spolur.is/en/faq"},
 {k:"INGRESSO",n:"Stokksnes / Vestrahorn",p:"1.000 ISK / persona",m:"Viking Café / self-service",d:"Ingresso a Vestrahorn e Viking Village.",u:"https://www.vestrahorn.is/is/viking-cafe"}
 ],
 5:[
-{k:"PEDAGGIO",n:"Hornafjörður ×1",p:"1.500 ISK",m:"Spölur · entro 12 h",d:"Passaggio previsto lasciando Hoffell verso est. Pagare direttamente entro 12 ore.",u:"https://www.spolur.is/en/faq"},
+{k:"PERCORSO",n:"Hoffell → est",p:"Nessun pedaggio previsto",m:"Verificare il percorso",d:"Non occorre riattraversare il nuovo ponte. Si paga solo se si attraversa effettivamente il portale.",u:"https://www.spolur.is/en/faq"},
 {k:"PEDAGGIO",n:"Vaðlaheiðargöng ×1",p:"2.216 ISK",m:"tunnel.is · ±24 h",d:"Un passaggio previsto verso Akureyri. Pagabile nelle 24 ore prima o dopo.",u:"https://www.veggjald.is/en-gb/"}
 ],
 6:[

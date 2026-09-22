@@ -21,6 +21,7 @@
     {day:4,name:'Fjaðrárgljúfur',isk:1300,kind:'Parcheggio',pay:'Parka',note:'Categoria 6–9 posti; parcheggio principale.'},
     {day:4,name:'Skaftafell',isk:1440,kind:'Parcheggio',pay:'Parka',note:'Categoria 6–9 posti. Primo parcheggio Vatnajökull della giornata.'},
     {day:4,name:'Jökulsárlón + Diamond Beach',isk:720,kind:'Parcheggio',pay:'Parka',note:'Secondo sito Vatnajökull nello stesso giorno: applicato sconto 50% su 1.440 ISK.'},
+    {day:4,name:'Hornafjarðarfljót · nuovo ponte',isk:1500,kind:'Pedaggio',pay:'Spölur · entro 12 h',note:'Stima: 1 passaggio verso Höfn/Stokksnes. 1.500 ISK per auto sotto 3,5 t. Adeguare l’importo ai passaggi effettivi; nessun pedaggio se si evita il portale tramite la 987.'},
     {day:5,name:'Egilsstaðir',isk:0,kind:'Parcheggio',pay:'—',note:'Parcheggi pubblici centrali generalmente gratuiti.'},
     {day:5,name:'Seyðisfjörður',isk:0,kind:'Parcheggio',pay:'—',note:'Area porto/centro: gratuito.'},
     {day:5,name:'Goðafoss',isk:0,kind:'Parcheggio',pay:'—',note:'Lato Fosshóll: gratuito.'},
@@ -55,6 +56,18 @@
     {day:3,name:'Plane Wreck · navetta',eur:20,perPerson:true,kind:'Facoltativo',note:'Da valutare in base a tempo e meteo. Escluso completamente dal totale.'}
   ];
 
+  for(const [group,items] of [['parking',parkingItems],['entries',entryItems],['optional',optionalItems]]) {
+    items.forEach(item=>{
+      item.key=`site:${group}:${item.day}:${item.name}`;
+      window.IslandaCosts.register({key:item.key,name:item.name,amount:item.eur??item.isk??0,currency:item.eur!==undefined?'EUR':'ISK',perPerson:!!item.perPerson,referenceNote:item.pay||item.kind});
+    });
+  }
+  function effective(item){
+    const amount=window.IslandaCosts.override(item.key);
+    if(amount===null)return item;
+    return {...item,[item.eur!==undefined?'eur':'isk']:amount,maxIsk:undefined};
+  }
+
   const fmtEUR = n => new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
   const fmtISK = n => `${new Intl.NumberFormat('it-IT',{maximumFractionDigits:0}).format(Math.round(n))} ISK`;
 
@@ -68,6 +81,7 @@
   }
 
   function itemGroupEUR(item,rate,useMax=false){
+    item=effective(item);
     const qty=item.perPerson?PEOPLE:1;
     const isk=useMax&&Number.isFinite(item.maxIsk)?item.maxIsk:(item.isk||0);
     return ((isk*rate)+(item.eur||0))*qty;
@@ -81,7 +95,8 @@
 
   function totalsISK(items,useMax=false){
     return items.reduce((sum,item)=>{
-      const qty=item.perPerson?PEOPLE:1;
+      item=effective(item);
+    const qty=item.perPerson?PEOPLE:1;
       const amount=useMax&&Number.isFinite(item.maxIsk)?item.maxIsk:(item.isk||0);
       return sum+amount*qty;
     },0);
@@ -124,11 +139,12 @@
     const max=totals(fx.rate,true);
     const pIsk=totalsISK(parkingItems,false);
     const eIsk=totalsISK(entryItems,false);
-    const entriesEur=entryItems.reduce((s,x)=>s+(x.eur||0)*(x.perPerson?PEOPLE:1),0);
+    const entriesEur=entryItems.reduce((s,x)=>s+(effective(x).eur||0)*(x.perPerson?PEOPLE:1),0);
+    const parkingEur=parkingItems.reduce((s,x)=>s+(effective(x).eur||0),0);
     const summary=document.getElementById('siteCostsSummary');
     const parkingRange=Math.abs(max.parking-base.parking)>.01 ? `${fmtEUR(base.parking)}–${fmtEUR(max.parking)}` : fmtEUR(base.parking);
     summary.innerHTML=
-      summaryCard('PARCHEGGI + PEDAGGI',parkingRange,`${fmtISK(pIsk)} + €12,50 · gruppo`,'parking')+
+      summaryCard('PARCHEGGI + PEDAGGI',parkingRange,`${fmtISK(pIsk)} + ${fmtEUR(parkingEur)} · gruppo`,'parking')+
       summaryCard('INGRESSI INCLUSI',fmtEUR(base.entries),`${fmtISK(eIsk)} + ${fmtEUR(entriesEur)} · gruppo`,'entries')+
       summaryCard('TOTALE SUL POSTO',Math.abs(max.total-base.total)>.01?`${fmtEUR(base.total)}–${fmtEUR(max.total)}`:fmtEUR(base.total),Math.abs(max.total-base.total)>.01?`${fmtEUR(base.total/PEOPLE)}–${fmtEUR(max.total/PEOPLE)} a persona`:`${fmtEUR(base.total/PEOPLE)} a persona`,'total');
 
@@ -142,6 +158,7 @@
   }
 
   function itemPriceText(item,rate){
+    item=effective(item);
     const unit=[];
     if(item.isk||item.isk===0)unit.push(item.isk===0?'gratis':fmtISK(item.isk));
     if(item.eur)unit.push(fmtEUR(item.eur));
@@ -158,17 +175,21 @@
     const fx=currentRate();
     const items=tab==='entries'?entryItems:tab==='optional'?optionalItems:parkingItems;
     const grouped=groupByDay(items);
+    const opened=new Set([...detail.querySelectorAll('.site-cost-day.is-open .site-cost-day-head > span')].map(x=>x.textContent));
     detail.innerHTML=Object.entries(grouped).map(([day,rows])=>{
       const body=rows.map(item=>{
         const price=itemPriceText(item,fx.rate);
         return `<div class="site-cost-row">
-          <div class="site-cost-main"><span class="site-cost-kind">${item.kind}</span><b>${item.name}</b><small>${item.note}</small></div>
+          <div class="site-cost-main"><span class="site-cost-kind">${item.kind}</span><b>${item.name}</b><small>${item.note}</small><small class="cost-reference">Riferimento: ${item.eur!==undefined?fmtEUR(item.eur):fmtISK(item.isk||0)}${window.IslandaCosts.override(item.key)!==null?" · importo aggiornato dal gruppo":""}</small>${window.IslandaCosts.button(item.key)}</div>
           <div class="site-cost-price"><strong>${price.unit}</strong><span>${price.group}</span>${item.pay?`<em>${item.pay}</em>`:''}</div>
         </div>`;
       }).join('');
       return `<div class="site-cost-day"><button type="button" class="site-cost-day-head" aria-expanded="false"><span>G${day}</span><b>${dayLabel(Number(day))}</b><i>⌄</i></button><div class="site-cost-day-body">${body}</div></div>`;
     }).join('');
 
+    detail.querySelectorAll('.site-cost-day-head').forEach(btn=>{
+      if(opened.has(btn.querySelector('span').textContent)){btn.parentElement.classList.add('is-open');btn.setAttribute('aria-expanded','true');}
+    });
     detail.querySelectorAll('.site-cost-day-head').forEach(btn=>btn.addEventListener('click',()=>{
       const box=btn.parentElement;
       const open=box.classList.toggle('is-open');
@@ -218,6 +239,7 @@
       const next=fmtEUR(parkingPerPerson);
       if(strong&&strong.textContent!==next)strong.textContent=next;
     }
+    if(typeof costi!=='undefined'){const parking=costi.find(x=>x.voce==='Parcheggi'),totalCost=costi.find(x=>x.voce==='Totale a persona');if(parking)parking.valore=fmtEUR(parkingPerPerson);if(totalCost)totalCost.valore=`${fmtEUR(total)} circa`;}
     const hero=document.getElementById('budgetKnownTotal');
     const heroNext=`${fmtEUR(total)} circa`;
     if(hero&&hero.textContent!==heroNext)hero.textContent=heroNext;
@@ -231,6 +253,7 @@
     if(costsPanel)new MutationObserver(()=>renderSummary()).observe(costsPanel,{childList:true,subtree:true});
     const macro=document.getElementById('budgetMacroGrid');
     if(macro)new MutationObserver(()=>{const fx=currentRate();patchMacroBudget(totals(fx.rate,false).parking/PEOPLE);}).observe(macro,{childList:true,subtree:true});
+    window.addEventListener('islanda:costs-changed',()=>{renderSummary();renderDetail(document.querySelector('[data-cost-tab].is-active')?.dataset.costTab||'parking');});
     window.addEventListener('islanda:data-status',e=>{if(e.detail?.source==='fx'){renderSummary();const active=document.querySelector('[data-cost-tab].is-active')?.dataset.costTab||'parking';renderDetail(active);}});
     window.addEventListener('storage',e=>{if(e.key===FX_CACHE_KEY){renderSummary();const active=document.querySelector('[data-cost-tab].is-active')?.dataset.costTab||'parking';renderDetail(active);}});
   }

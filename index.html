@@ -255,6 +255,7 @@
 <link rel="stylesheet" href="altro-restyle.css">
 <link rel="stylesheet" href="global-polish.css">
 <link rel="stylesheet" href="ops-live.css">
+<link rel="stylesheet" href="budget-editor.css">
 </head>
 <body>
 <div id="appLaunch" role="status" aria-live="polite" aria-label="Caricamento di Islanda 2026">
@@ -768,7 +769,7 @@ document.getElementById('iskInput').addEventListener('input', function() {
   // ---- Spese di gruppo (Supabase) ----
   async function caricaSpese(){
     const { data: spese, error } = await sb.from('expenses').select('*').order('created_at', { ascending: false });
-    if(error) console.error('Errore spese:', error.message, error.details, error.hint, error.code);
+    if(error){console.error('Errore spese:',error.message);return;}
     const list = document.getElementById('expensesList');
     list.innerHTML = '';
 
@@ -778,11 +779,14 @@ document.getElementById('iskInput').addEventListener('input', function() {
       spese.forEach(s => {
         const row = document.createElement('div');
         row.className = 'exp-row';
-        row.innerHTML = '<div>' + s.description + '<div class="paidby">pagato da ' + s.paid_by + '</div></div>' +
-          '<div style="display:flex;align-items:center;gap:8px;">' +
-          '<div class="v" style="font-family:\'JetBrains Mono\',monospace;color:var(--aurora-1)">€ ' + Number(s.amount).toFixed(2) + '</div>' +
-          '<button class="del-btn" title="Elimina spesa" data-id="' + s.id + '">✕</button>' +
+        row.dataset.amount = String(s.amount);
+        row.innerHTML = '<div>' + window.IslandaCosts.esc(s.description) + '<div class="paidby">pagato da ' + window.IslandaCosts.esc(s.paid_by) + '</div></div>' +
+          '<div class="exp-actions">' +
+          '<div class="v" style="font-family:\'JetBrains Mono\',monospace;color:var(--aurora-1)">€ ' + Number(s.amount).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</div>' +
+          '<button type="button" class="cost-edit-button exp-edit" aria-label="Modifica importo spesa">Modifica</button>' +
+          '<button class="del-btn" aria-label="Elimina spesa" title="Elimina spesa" data-id="' + s.id + '">✕</button>' +
           '</div>';
+        row.querySelector('.exp-edit').addEventListener('click',()=>window.IslandaCosts.editExpense(s));
         row.querySelector('.del-btn').addEventListener('click', async function(){
           if(!confirm('Eliminare questa spesa?')) return;
           const { error } = await sb.from('expenses').delete().eq('id', s.id);
@@ -1076,10 +1080,13 @@ document.getElementById('iskInput').addEventListener('input', function() {
 <script src="home-dashboard.js" defer></script>
 <script src="itinerary-restyle.js" defer></script>
 <script src="budget-restyle.js" defer></script>
+<script src="budget-editor.js" defer></script>
 <script src="site-costs.js" defer></script>
 <script src="parking-maps.js" defer></script>
 <script src="altro-restyle.js" defer></script>
 <script src="ops-live.js" defer></script>
 <script src="currency-live.js" defer></script>
+<script src="accessibility.js" defer></script>
+<script src="hofn-route.js" defer></script>
 </body>
 </html>
