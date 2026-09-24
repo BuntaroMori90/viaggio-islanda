@@ -26,6 +26,114 @@
   const getData=n=>{
     try{return typeof giorni!=='undefined'&&Array.isArray(giorni)?giorni.find(x=>x.num===n):null;}catch(_){return null;}
   };
+  const mapsSearch=q=>`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+
+  // Revisione operativa del 24/09: G4 anticipato alle 11:15 e partenza reale da Ásar.
+  // Viene applicata dopo il bootstrap di push-notifications.js, che contiene ancora il vecchio orario.
+  const applyProgramRevision=()=>{
+    try{
+      if(typeof giorni==='undefined'||!Array.isArray(giorni))return;
+      const d4=giorni.find(x=>x.num===4);
+      const d5=giorni.find(x=>x.num===5);
+      if(d4){
+        Object.assign(d4,{
+          luogo:'Hoffell, Iceland',
+          lat:64.39653,
+          lon:-15.34179,
+          storia:'Partenza alle 08:00 da Skaftártunguvegur Ásar. Prima del tour restano Fjaðrárgljúfur e una sosta rapida a Foss á Síðu; arrivo obiettivo al parcheggio principale di Jökulsárlón verso le 10:40–10:45. Il tour della grotta di ghiaccio parte alle 11:15. Dopo il tour: Diamond Beach, rifornimento a Höfn, Stokksnes/Vestrahorn e pernottamento al Glacier World - Hoffell Guesthouse.',
+          schedule:[
+            ['08:00','Partenza da The Holiday Houses by Stay in Iceland','Skaftártunguvegur Ásar, 881 Kirkjubæjarklaustur'],
+            ['~08:20 – 08:50','Fjaðrárgljúfur','Circa 30 min: viewpoint e foto, senza allungare la passeggiata'],
+            ['~09:10 – 09:20','Foss á Síðu','Sosta fotografica breve · prima tappa da comprimere se siamo in ritardo'],
+            ['~10:40 – 10:45','Jökulsárlón · parcheggio principale','Arrivo obiettivo. Meeting point vicino ai servizi igienici; non usare il parcheggio alternativo'],
+            ['11:15 – ~14:15','Jökulsárlón / Vatnajökull','Tour guidato della grotta di ghiaccio · 6 adulti · orario aggiornato'],
+            ['~14:20 – 15:00','Diamond Beach','Laguna + spiaggia; è nello stesso complesso di Jökulsárlón'],
+            ['~16:05','N1 Höfn','Pieno rapido sul percorso prima di Stokksnes'],
+            ['~16:25 – 17:15','Stokksnes / Vestrahorn','Vestrahorn + villaggio vichingo'],
+            ['~17:50','Glacier World - Hoffell Guesthouse','Check-in e pernottamento confermato · Hoffell 2B']
+          ],
+          must:['Ice Cave','Diamond Beach'],
+          bonus:['Fjaðrárgljúfur','Stokksnes / Vestrahorn'],
+          sac:['Foss á Síðu'],
+          meta:{
+            guida:'Ásar → Jökulsárlón → Stokksnes → Hoffell · ~3h40 di guida',
+            benzina:'N1 Höfn · pieno dopo Diamond Beach / prima di Stokksnes',
+            cibo:'colazione in casa + snack/pranzo a sacco; eventuale sosta a Höfn dopo il tour'
+          },
+          percorsoCompletoMaps:'https://www.google.com/maps/dir/?api=1&origin=Skaft%C3%A1rtunguvegur+%C3%81sar%2C+881+Kirkjub%C3%A6jarklaustur%2C+Iceland&destination=Glacier+World+-+Hoffell+Guesthouse%2C+Hoffell+2B%2C+781+H%C3%B6fn%2C+Iceland&waypoints=Fja%C3%B0r%C3%A1rglj%C3%BAfur%2C+Iceland%7CFoss+%C3%A1+S%C3%AD%C3%B0u%2C+Iceland%7CJ%C3%B6kuls%C3%A1rl%C3%B3n%2C+Iceland%7CStokksnes%2C+Iceland&travelmode=driving',
+          trigger:'Ice Cave alle 11:15: arrivo obiettivo 10:40–10:45 al parcheggio principale di Jökulsárlón. Foss á Síðu è la prima tappa da ridurre se la mattina accumula ritardo. Dopo il tour, Stokksnes resta la tappa da eliminare se strada, meteo o tempi compromettono l’arrivo a Hoffell.',
+          cutoffsReady:true,
+          cutoffs:[
+            {time:'08:55',condition:'Se siamo ancora a Fjaðrárgljúfur',action:'Ripartire subito; Foss á Síðu diventa una foto rapidissima o si salta',level:'reduce'},
+            {time:'09:25',condition:'Se non abbiamo lasciato Foss á Síðu',action:'Diretto a Jökulsárlón senza altre soste',level:'direct'},
+            {time:'10:50',condition:'Se non siamo ancora parcheggiati a Jökulsárlón',action:'Nessuna sosta: raggiungere subito il parcheggio principale e il meeting point',level:'direct'},
+            {time:'16:45',condition:'Se non siamo ancora arrivati a Stokksnes',action:'Saltare Stokksnes e proseguire verso Glacier World - Hoffell Guesthouse',level:'reduce'},
+            {time:'17:20',condition:'Se siamo ancora a Stokksnes',action:'Ripartire verso Hoffell',level:'direct'}
+          ],
+          checks:[
+            {title:'Ice Cave · orario e meeting point',text:'Partenza tour 11:15. Meeting point nel parcheggio principale di Jökulsárlón, vicino ai servizi igienici. Non andare al parcheggio alternativo, che si trova circa 3 km più lontano.'},
+            {title:'Mattina · margine',text:'Obiettivo Jökulsárlón 10:40–10:45. Fjaðrárgljúfur resta una visita breve; Foss á Síðu è la prima tappa da comprimere o eliminare se perdiamo tempo.'}
+          ]
+        });
+      }
+      if(d5&&Array.isArray(d5.schedule)&&d5.schedule.length){
+        d5.schedule[0]=['08:30','Partenza da Glacier World - Hoffell Guesthouse','Hoffell 2B · pernottamento del Giorno 4'];
+        d5.storia='Lunga traversata da Hoffell ad Akureyri. Partenza dal Glacier World - Hoffell Guesthouse; pernottamento confermato ad Acco Ice Apartments. Forest Lagoon confermata alle 19:30 per 6 persone.';
+      }
+    }catch(err){console.warn('[Islanda] Revisione G4 non applicata',err);}
+  };
+
+  const mbsHTML=g=>{
+    const group=(label,items,cls)=>!Array.isArray(items)||!items.length?'':`<div class="mbs-col ${cls}"><div class="mbs-lbl">${label}</div><ul>${items.map(i=>`<li>${i}</li>`).join('')}</ul></div>`;
+    return group('Must',g.must,'must')+group('Bonus',g.bonus,'bonus')+group('Sacrificabili',g.sac,'sac');
+  };
+
+  // Sincronizza il DOM se l'autologin ha renderizzato l'itinerario prima della revisione dati.
+  const syncCoreDay=el=>{
+    const n=getNum(el),g=getData(n);
+    if(!n||!g)return;
+    const title=el.querySelector('.day-title');
+    const sub=el.querySelector('.day-sub');
+    const story=el.querySelector('.story');
+    if(title)title.textContent=g.titolo||'';
+    if(sub)sub.textContent=g.sub||'';
+    if(story)story.textContent=g.storia||'';
+
+    const tbody=el.querySelector('.schedule tbody');
+    if(tbody&&Array.isArray(g.schedule)){
+      tbody.innerHTML=g.schedule.map(r=>`<tr><td class="t">${r[0]}</td><td><a class="act-link" target="_blank" href="${mapsSearch(r[1])}">${r[1]}</a></td><td class="n">${r[2]||''}</td></tr>`).join('');
+    }
+
+    const mbs=el.querySelector('.mbs');
+    if(mbs)mbs.innerHTML=mbsHTML(g);
+
+    const meta=el.querySelector('.meta-row');
+    if(meta&&g.meta){
+      meta.innerHTML=`<span>Guida: <b>${g.meta.guida||'—'}</b></span><span>Benzina: <b>${g.meta.benzina||'—'}</b></span><span>Cibo: <b>${g.meta.cibo||'—'}</b></span>`;
+    }
+
+    const trigger=el.querySelector('.trigger');
+    if(trigger&&g.trigger)trigger.innerHTML=g.trigger;
+
+    const weather=el.querySelector('.day-weather');
+    if(weather){
+      const weatherText=weather.querySelector(':scope > span');
+      if(weatherText&&!weatherText.textContent.includes('°C'))weatherText.textContent=`Meteo ora a ${(g.luogo||'').split(',')[0]}: caricamento…`;
+      const links=[...weather.querySelectorAll('.maps-link')];
+      if(links[0])links[0].href=mapsSearch(g.luogo||'');
+      const route=links.find(a=>(a.textContent||'').includes('Percorso Completo'));
+      if(route&&g.percorsoCompletoMaps)route.href=g.percorsoCompletoMaps;
+    }
+  };
+
+  const syncRenderedProgram=()=>{
+    days().forEach(syncCoreDay);
+    if(container.children.length){
+      const marker=document.createComment('islanda-program-revision');
+      container.appendChild(marker);
+      marker.remove();
+    }
+  };
 
   const a6Info=(el,n)=>{
     const state=(el.querySelector('.decision-state')?.textContent||'').trim().toUpperCase();
@@ -117,6 +225,13 @@
 
   const observer=new MutationObserver(()=>refresh());
   observer.observe(container,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+
+  // push-notifications.js applica le sue correzioni al DOMContentLoaded; questa revisione deve vincere dopo quel passaggio.
+  document.addEventListener('DOMContentLoaded',()=>{
+    applyProgramRevision();
+    syncRenderedProgram();
+    refresh();
+  },{once:true});
 
   refresh();
 })();
