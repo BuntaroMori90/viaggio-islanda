@@ -35,8 +35,8 @@
     if(i>=0)day.checks[i]=value;else day.checks.push(value);
   };
 
-  // Revisione operativa definitiva del programma.
-  // push-notifications.js inizializza i dati base; qui viene applicata la versione finale usata dall'itinerario.
+  // Fonte canonica del programma operativo. I dati base/legacy possono essere inizializzati
+  // da altri script, ma questa revisione deve sempre prevalere nell'app.
   const applyProgramRevision=()=>{
     try{
       if(typeof giorni==='undefined'||!Array.isArray(giorni))return;
@@ -45,12 +45,10 @@
       const d5=giorni.find(x=>x.num===5);
       const d6=giorni.find(x=>x.num===6);
 
-      // Nota leggera sul transito a Luton: non viene creato un Giorno 0 dedicato.
       if(d1){
         addCheck(d1,'29–30 settembre · transito Luton','Dopo FR5456 Napoli → Luton (arrivo 22:55) è previsto il pernottamento vicino all’aeroporto. Il 30/09 easyJet EZY2635 parte alle 06:15 per Keflavík. È una nota operativa di transito, non una giornata dell’itinerario Islanda.');
       }
 
-      // G4: orario definitivo Ice Cave 11:15 e partenza da Ásar alle 08:00.
       if(d4){
         Object.assign(d4,{
           luogo:'Hoffell, Iceland',
@@ -93,7 +91,6 @@
         });
       }
 
-      // G5: Forest Lagoon confermata e permanenza prevista fino a massimo due ore.
       if(d5){
         if(Array.isArray(d5.schedule)&&d5.schedule.length){
           d5.schedule[0]=['08:30','Partenza da Glacier World - Hoffell Guesthouse','Hoffell 2B · pernottamento del Giorno 4'];
@@ -106,7 +103,6 @@
         addCheck(d5,'Forest Lagoon · permanenza','Ingresso prenotato alle 19:30 per 6 persone, con finestra di arrivo fino alle 20:00. La struttura indica una permanenza prevista fino a massimo 2 ore.');
       }
 
-      // G6: whale watching confermato, ma pagamento ancora da completare.
       if(d6&&Array.isArray(d6.schedule)){
         const whaleIndex=d6.schedule.findIndex(r=>String(r?.[1]||'').toLowerCase().includes('whale watching'));
         if(whaleIndex>=0){
@@ -252,17 +248,25 @@
     document.querySelectorAll('#itineraryDayTabs .itinerary-day-tab').forEach(btn=>btn.classList.toggle('is-today',duringTrip()&&+btn.dataset.day===today));
   };
 
-  const onItineraryEntry=()=>setTimeout(()=>selectDay(dayNumNow(),{scroll:false}),70);
-  document.addEventListener('click',e=>{if(e.target.closest('.app-tab[data-tab="itinerario"]'))onItineraryEntry();});
-
-  const observer=new MutationObserver(()=>refresh());
-  observer.observe(container,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
-
-  document.addEventListener('DOMContentLoaded',()=>{
+  const enforceCanonicalProgram=()=>{
     applyProgramRevision();
     syncRenderedProgram();
     refresh();
-  },{once:true});
+  };
+
+  const onItineraryEntry=()=>setTimeout(()=>{enforceCanonicalProgram();selectDay(dayNumNow(),{scroll:false});},70);
+  document.addEventListener('click',e=>{if(e.target.closest('.app-tab[data-tab="itinerario"]'))onItineraryEntry();});
+
+  const observer=new MutationObserver(()=>{
+    applyProgramRevision();
+    refresh();
+  });
+  observer.observe(container,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+
+  // Applica subito la revisione canonica e la riapplica dopo gli inizializzatori legacy.
+  enforceCanonicalProgram();
+  document.addEventListener('DOMContentLoaded',enforceCanonicalProgram,{once:true});
+  window.addEventListener('pageshow',enforceCanonicalProgram);
 
   refresh();
 })();
