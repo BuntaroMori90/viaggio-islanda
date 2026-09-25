@@ -27,14 +27,30 @@
     try{return typeof giorni!=='undefined'&&Array.isArray(giorni)?giorni.find(x=>x.num===n):null;}catch(_){return null;}
   };
   const mapsSearch=q=>`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+  const addCheck=(day,title,text)=>{
+    if(!day)return;
+    if(!Array.isArray(day.checks))day.checks=[];
+    const i=day.checks.findIndex(x=>x?.title===title);
+    const value={title,text};
+    if(i>=0)day.checks[i]=value;else day.checks.push(value);
+  };
 
-  // Revisione operativa del 24/09: G4 anticipato alle 11:15 e partenza reale da Ásar.
-  // Viene applicata dopo il bootstrap di push-notifications.js, che contiene ancora il vecchio orario.
+  // Revisione operativa definitiva del programma.
+  // push-notifications.js inizializza i dati base; qui viene applicata la versione finale usata dall'itinerario.
   const applyProgramRevision=()=>{
     try{
       if(typeof giorni==='undefined'||!Array.isArray(giorni))return;
+      const d1=giorni.find(x=>x.num===1);
       const d4=giorni.find(x=>x.num===4);
       const d5=giorni.find(x=>x.num===5);
+      const d6=giorni.find(x=>x.num===6);
+
+      // Nota leggera sul transito a Luton: non viene creato un Giorno 0 dedicato.
+      if(d1){
+        addCheck(d1,'29–30 settembre · transito Luton','Dopo FR5456 Napoli → Luton (arrivo 22:55) è previsto il pernottamento vicino all’aeroporto. Il 30/09 easyJet EZY2635 parte alle 06:15 per Keflavík. È una nota operativa di transito, non una giornata dell’itinerario Islanda.');
+      }
+
+      // G4: orario definitivo Ice Cave 11:15 e partenza da Ásar alle 08:00.
       if(d4){
         Object.assign(d4,{
           luogo:'Hoffell, Iceland',
@@ -46,7 +62,7 @@
             ['~08:20 – 08:50','Fjaðrárgljúfur','Circa 30 min: viewpoint e foto, senza allungare la passeggiata'],
             ['~09:10 – 09:20','Foss á Síðu','Sosta fotografica breve · prima tappa da comprimere se siamo in ritardo'],
             ['~10:40 – 10:45','Jökulsárlón · parcheggio principale','Arrivo obiettivo. Meeting point vicino ai servizi igienici; non usare il parcheggio alternativo'],
-            ['11:15 – ~14:15','Jökulsárlón / Vatnajökull','Tour guidato della grotta di ghiaccio · 6 adulti · orario aggiornato'],
+            ['11:15 – ~14:15','Jökulsárlón / Vatnajökull','Tour guidato della grotta di ghiaccio · 6 adulti · orario definitivo'],
             ['~14:20 – 15:00','Diamond Beach','Laguna + spiaggia; è nello stesso complesso di Jökulsárlón'],
             ['~16:05','N1 Höfn','Pieno rapido sul percorso prima di Stokksnes'],
             ['~16:25 – 17:15','Stokksnes / Vestrahorn','Vestrahorn + villaggio vichingo'],
@@ -76,11 +92,30 @@
           ]
         });
       }
-      if(d5&&Array.isArray(d5.schedule)&&d5.schedule.length){
-        d5.schedule[0]=['08:30','Partenza da Glacier World - Hoffell Guesthouse','Hoffell 2B · pernottamento del Giorno 4'];
+
+      // G5: Forest Lagoon confermata e permanenza prevista fino a massimo due ore.
+      if(d5){
+        if(Array.isArray(d5.schedule)&&d5.schedule.length){
+          d5.schedule[0]=['08:30','Partenza da Glacier World - Hoffell Guesthouse','Hoffell 2B · pernottamento del Giorno 4'];
+          const forestIndex=d5.schedule.findIndex(r=>String(r?.[1]||'').toLowerCase().includes('forest lagoon'));
+          if(forestIndex>=0){
+            d5.schedule[forestIndex]=['19:30','Forest Lagoon','Prenotazione confermata · 6 ospiti · ingresso 19:30–20:00 · permanenza prevista max 2 ore'];
+          }
+        }
         d5.storia='Lunga traversata da Hoffell ad Akureyri. Partenza dal Glacier World - Hoffell Guesthouse; pernottamento confermato ad Acco Ice Apartments. Forest Lagoon confermata alle 19:30 per 6 persone.';
+        addCheck(d5,'Forest Lagoon · permanenza','Ingresso prenotato alle 19:30 per 6 persone, con finestra di arrivo fino alle 20:00. La struttura indica una permanenza prevista fino a massimo 2 ore.');
       }
-    }catch(err){console.warn('[Islanda] Revisione G4 non applicata',err);}
+
+      // G6: whale watching confermato, ma pagamento ancora da completare.
+      if(d6&&Array.isArray(d6.schedule)){
+        const whaleIndex=d6.schedule.findIndex(r=>String(r?.[1]||'').toLowerCase().includes('whale watching'));
+        if(whaleIndex>=0){
+          const row=d6.schedule[whaleIndex];
+          d6.schedule[whaleIndex]=[row[0],row[1],'Tour confermato · 6 adulti · pagamento ancora da completare'];
+        }
+        addCheck(d6,'Whale Watching Húsavík · pagamento','Tour delle 09:00 confermato. La prenotazione è valida, ma il pagamento non è ancora stato completato.');
+      }
+    }catch(err){console.warn('[Islanda] Revisione programma non applicata',err);}
   };
 
   const mbsHTML=g=>{
@@ -88,7 +123,6 @@
     return group('Must',g.must,'must')+group('Bonus',g.bonus,'bonus')+group('Sacrificabili',g.sac,'sac');
   };
 
-  // Sincronizza il DOM se l'autologin ha renderizzato l'itinerario prima della revisione dati.
   const syncCoreDay=el=>{
     const n=getNum(el),g=getData(n);
     if(!n||!g)return;
@@ -168,8 +202,6 @@
       const active=+btn.dataset.day===n;
       btn.classList.toggle('is-active',active);
       btn.setAttribute('aria-current',active?'true':'false');
-      // Only move the horizontal day strip after an explicit day selection.
-      // scrollIntoView also scrolls the page when a nested accordion changes.
       if(active&&reveal){
         const nav=btn.parentElement;
         nav.scrollTo({left:btn.offsetLeft-nav.offsetLeft-(nav.clientWidth-btn.offsetWidth)/2,behavior:'smooth'});
@@ -226,7 +258,6 @@
   const observer=new MutationObserver(()=>refresh());
   observer.observe(container,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
 
-  // push-notifications.js applica le sue correzioni al DOMContentLoaded; questa revisione deve vincere dopo quel passaggio.
   document.addEventListener('DOMContentLoaded',()=>{
     applyProgramRevision();
     syncRenderedProgram();
