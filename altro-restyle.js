@@ -4,9 +4,9 @@
 
   const bookings=[
     {at:'2026-09-30T09:00:00Z',name:'Blue Car Rental',meta:'Ritiro auto · KEF'},
-    {at:'2026-10-03T12:30:00Z',name:'Ice Cave · Vatnajökull',meta:'Jökulsárlón · 6 adulti'},
-    {at:'2026-10-04T19:30:00Z',name:'Forest Lagoon',meta:'Akureyri · 19:30'},
-    {at:'2026-10-05T09:00:00Z',name:'Whale Watching',meta:'Húsavík · 09:00–12:00'},
+    {at:'2026-10-03T11:15:00Z',name:'Ice Cave · Vatnajökull',meta:'Jökulsárlón · 6 adulti'},
+    {at:'2026-10-04T19:30:00Z',name:'Forest Lagoon',meta:'Akureyri · 19:30 · max 2 ore'},
+    {at:'2026-10-05T09:00:00Z',name:'Whale Watching',meta:'Húsavík · 09:00–12:00 · pagamento da completare'},
     {at:'2026-10-05T18:00:00Z',name:'Earth Lagoon Mývatn',meta:'18:00–20:00'},
     {at:'2026-10-08T08:30:00Z',name:'Blue Car Rental',meta:'Riconsegna auto · KEF'}
   ];
@@ -97,8 +97,9 @@
       <div class="travel-wallet-details" id="walletInsurance">
         <button type="button" aria-expanded="false"><span>Assicurazione & documenti</span><span>⌄</span></button>
         <div class="travel-wallet-details-body">
-          <div class="travel-wallet-row"><div><strong>Heymondo</strong><small>Assicurazione viaggio già conteggiata nel budget · €44 a persona. Numero polizza e assistenza non sono ancora salvati nell'app.</small></div><span></span></div>
-          <div class="travel-wallet-row"><div><strong>Documenti offline</strong><small>Prima della partenza conserva sul telefono carte d'imbarco, passaporto/ID, ETA UK e conferme principali.</small></div><span></span></div>
+          <div class="travel-wallet-row"><div><strong>Heymondo · polizza attiva</strong><small>Assistenza 24 ore su 24: +39 02 2412 8782.</small></div><a href="tel:+390224128782">CHIAMA</a></div>
+          <div class="travel-wallet-row"><div><strong>Copertura ritardo volo</strong><small>Con ritardo di almeno 2h30: accesso VIP Lounge oppure pagamento diretto di 50 €. Per attivarla, registrare i voli nell'app Heymondo almeno 24 ore prima della partenza.</small></div><span></span></div>
+          <div class="travel-wallet-row"><div><strong>Documenti offline</strong><small>Prima della partenza conserva sul telefono carte d'imbarco, passaporto/ID, ETA UK, polizza Heymondo e conferme principali.</small></div><span></span></div>
         </div>
       </div>`;
 
