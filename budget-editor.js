@@ -91,6 +91,86 @@
       if(!tile.querySelector('[data-edit-cost]'))tile.insertAdjacentHTML('beforeend',button('budget:'+budgetKeys[i]));
     });
   }
+
+  // Carmen resta nel gruppo e nelle spese registrate, ma è esclusa da ogni ripartizione.
+  // Le spese eventualmente pagate da Carmen restano visibili ma non entrano nei saldi condivisi,
+  // così il suo saldo rimane sempre esattamente a zero.
+  const EXPENSE_EXCLUDED='Carmen';
+  const activeExpenseParticipants=()=>typeof partecipanti!=='undefined'
+    ? partecipanti.filter(p=>String(p).toLowerCase()!==EXPENSE_EXCLUDED.toLowerCase())
+    : [];
+  const round2=x=>Math.round((Number(x)||0)*100)/100;
+
+  async function renderExpenseSplitWithoutCarmen(){
+    if(typeof sb==='undefined'||typeof partecipanti==='undefined')return;
+    const box=document.getElementById('balancesBox');
+    const settlBox=document.getElementById('settlementsBox');
+    if(!box||!settlBox)return;
+
+    const {data:spese,error}=await sb.from('expenses').select('amount,paid_by');
+    if(error){console.error('Errore ricalcolo divisione spese:',error.message);return;}
+
+    const active=activeExpenseParticipants();
+    const balances=Object.fromEntries(partecipanti.map(p=>[p,0]));
+    let totaleDiviso=0;
+
+    (spese||[]).forEach(s=>{
+      const amount=Number(s.amount)||0;
+      if(!active.includes(s.paid_by))return;
+      balances[s.paid_by]=(balances[s.paid_by]||0)+amount;
+      totaleDiviso+=amount;
+    });
+
+    const quota=active.length?totaleDiviso/active.length:0;
+    active.forEach(p=>{balances[p]=(balances[p]||0)-quota;});
+    balances[EXPENSE_EXCLUDED]=0;
+
+    box.innerHTML=partecipanti.map(p=>{
+      const excluded=String(p).toLowerCase()===EXPENSE_EXCLUDED.toLowerCase();
+      const v=excluded?0:round2(balances[p]);
+      const segno=excluded||v===0?'':(v>0?'+':'');
+      const colore=excluded?'var(--ice-dim)':(v>=0?'var(--aurora-1)':'var(--ember)');
+      return `<div>${esc(p)}: <b style="color:${colore}">${segno}${v.toFixed(2)} €</b>${excluded?' <span style="font-size:11px;color:var(--ice-dim)">· esclusa dalla divisione</span>':''}</div>`;
+    }).join('');
+
+    const creditori=active
+      .map(p=>({nome:p,saldo:round2(balances[p])}))
+      .filter(b=>b.saldo>0.01)
+      .sort((a,b)=>b.saldo-a.saldo);
+    const debitori=active
+      .map(p=>({nome:p,saldo:round2(balances[p])}))
+      .filter(b=>b.saldo<-0.01)
+      .sort((a,b)=>a.saldo-b.saldo);
+
+    const trasferimenti=[];
+    let i=0,j=0;
+    while(i<debitori.length&&j<creditori.length){
+      const d=debitori[i],c=creditori[j];
+      const importo=round2(Math.min(-d.saldo,c.saldo));
+      if(importo>0.01)trasferimenti.push({da:d.nome,a:c.nome,importo});
+      d.saldo=round2(d.saldo+importo);
+      c.saldo=round2(c.saldo-importo);
+      if(Math.abs(d.saldo)<0.02)i++;
+      if(Math.abs(c.saldo)<0.02)j++;
+    }
+
+    settlBox.innerHTML=trasferimenti.length===0?'':
+      '<div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ice-dim); margin-bottom:8px; font-family:\'JetBrains Mono\',monospace;">Chi deve dare a chi</div>'+
+      trasferimenti.map(t=>`<div style="font-size:13px;padding:4px 0"><b>${esc(t.da)}</b> → <b>${esc(t.a)}</b>: ${t.importo.toFixed(2)} €</div>`).join('');
+  }
+
+  function patchExpenseLoader(){
+    if(typeof caricaSpese!=='function'||caricaSpese.__carmenExcluded)return;
+    const original=caricaSpese;
+    const patched=async function(...args){
+      const result=await original.apply(this,args);
+      await renderExpenseSplitWithoutCarmen();
+      return result;
+    };
+    patched.__carmenExcluded=true;
+    caricaSpese=patched;
+  }
+
   function boot(){
     if(typeof costi!=='undefined')costi.slice(0,7).forEach((row,i)=>{
       budgetDefaults.push({...row});if(i===4)return;
@@ -106,5 +186,6 @@
     const sync=()=>{if(!document.hidden&&window.currentUser){void refresh();if(navigator.onLine)void caricaSpese();}};
     document.addEventListener('visibilitychange',sync);window.addEventListener('online',sync);setInterval(sync,30000);
   }
-  document.addEventListener('DOMContentLoaded',boot,{once:true});
+  patchExpenseLoader();
+  document.addEventListener('DOMContentLoaded',()=>{patchExpenseLoader();void renderExpenseSplitWithoutCarmen();boot();},{once:true});
 })();
