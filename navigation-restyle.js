@@ -177,9 +177,41 @@
   };
   new MutationObserver(syncVisibility).observe(trip,{attributes:true,attributeFilter:['class']});
 
+  // Corregge il badge OGGI sulla base dei giorni reali dell'itinerario in Islanda:
+  // G1 = 30/09, G2 = 01/10, ... G8 = 07/10.
+  const tripStart='2026-09-30',tripEnd='2026-10-07',dayMs=86400000;
+  const icelandYmd=()=>{
+    const p=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Atlantic/Reykjavik',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
+    return `${p.year}-${p.month}-${p.day}`;
+  };
+  const currentTripDay=()=>{
+    const d=icelandYmd();
+    if(d<tripStart||d>tripEnd)return null;
+    return Math.floor((Date.parse(`${d}T00:00:00Z`)-Date.parse(`${tripStart}T00:00:00Z`))/dayMs)+1;
+  };
+  const syncTodayBadge=()=>{
+    const current=currentTripDay();
+    document.querySelectorAll('#daysContainer .day').forEach(day=>{
+      const num=day.querySelector('.day-num');
+      if(!num)return;
+      const match=(num.textContent||'').match(/G(\d+)/i);
+      const n=match?Number(match[1]):null;
+      const isToday=current!==null&&n===current;
+      num.classList.toggle('today',isToday);
+      const badge=num.querySelector('.today-badge');
+      if(isToday&&!badge)num.insertAdjacentHTML('beforeend','<span class="today-badge">OGGI</span>');
+      if(!isToday&&badge)badge.remove();
+    });
+  };
+  const daysContainer=document.getElementById('daysContainer');
+  if(daysContainer)new MutationObserver(syncTodayBadge).observe(daysContainer,{childList:true});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncTodayBadge();});
+  window.addEventListener('pageshow',syncTodayBadge);
+
   reorderUtilitySections();
   classify();
   syncVisibility();
+  syncTodayBadge();
   history.replaceState({...(history.state||{}),[HISTORY_KEY]:active},'',location.href);
   applyView(active,{restoreScroll:false});
 })();
